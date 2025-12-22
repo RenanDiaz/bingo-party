@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <!-- Gradient for bingo ball -->
+    <radialGradient id="ballGradient" cx="35%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#a855a8"/>
+      <stop offset="100%" stop-color="#7c2d7c"/>
+    </radialGradient>
+    <!-- Inner circle gradient -->
+    <radialGradient id="innerGradient" cx="45%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f0f0f0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Main bingo ball -->
+  <circle cx="100" cy="100" r="45" fill="url(#ballGradient)"/>
+
+  <!-- Highlight shine on ball -->
+  <ellipse cx="78" cy="78" rx="12" ry="8" fill="rgba(255,255,255,0.4)" transform="rotate(-45 78 78)"/>
+  <ellipse cx="72" cy="85" rx="5" ry="3" fill="rgba(255,255,255,0.5)" transform="rotate(-45 72 85)"/>
+
+  <!-- Inner white circle with border -->
+  <circle cx="100" cy="100" r="28" fill="url(#innerGradient)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+
+  <!-- Letter B -->
+  <text x="100" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#9333a8">B</text>
+
+  <!-- Decorative dots -->
+  <circle cx="50" cy="65" r="6" fill="#facc15"/> <!-- Yellow top-left -->
+  <circle cx="150" cy="85" r="6" fill="#84cc16"/> <!-- Green right -->
+  <circle cx="45" cy="120" r="6" fill="#84cc16"/> <!-- Green bottom-left -->
+  <circle cx="155" cy="125" r="6" fill="#f97316"/> <!-- Orange right -->
+  <circle cx="55" cy="150" r="6" fill="#f97316"/> <!-- Orange bottom-left -->
+  <circle cx="145" cy="60" r="6" fill="#facc15"/> <!-- Yellow top-right -->
+
+  <!-- BINGO text curved at top -->
+  <defs>
+    <path id="topArc" d="M 30,100 A 70,70 0 0,1 170,100" fill="none"/>
+  </defs>
+  <text font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="28" font-weight="800" fill="#1e1b4b">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">BINGO</textPath>
+  </text>
+
+  <!-- PARTY text curved at bottom -->
+  <defs>
+    <path id="bottomArc" d="M 30,100 A 70,70 0 0,0 170,100" fill="none"/>
+  </defs>
+  <text font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="28" font-weight="800" fill="#1e1b4b">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">PARTY</textPath>
+  </text>
+</svg>
