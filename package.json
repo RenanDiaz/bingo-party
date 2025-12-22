@@ -32,8 +32,8 @@
     "vite": "^7.2.6"
   },
   "dependencies": {
-    "partykit": "^0.0.111",
-    "partysocket": "^1.1.1",
+    "partykit": "^0.0.115",
+    "partysocket": "^1.1.10",
     "svelte-i18n": "^4.0.1"
   }
 }
