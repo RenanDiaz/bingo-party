@@ -29,6 +29,7 @@ export function createGameStore() {
 
   // WebSocket connection
   let socket: WebSocket | null = null;
+  let connectionTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // Derived state
   const myPlayer = $derived(
@@ -89,23 +90,66 @@ export function createGameStore() {
   function connect(roomId: string) {
     if (!browser) return;
 
-    const host = import.meta.env.VITE_PARTYKIT_HOST || 'localhost:1999';
-    const protocol = host.includes('localhost') ? 'ws' : 'wss';
-    const url = `${protocol}://${host}/party/${roomId}`;
+    const host = import.meta.env.VITE_PARTYKIT_HOST;
 
-    socket = new WebSocket(url);
+    // Check if PartyKit host is configured for production
+    if (!host) {
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (!isLocalhost) {
+        error = 'Game server not configured. Please set VITE_PARTYKIT_HOST.';
+        return;
+      }
+    }
+
+    const partyHost = host || 'localhost:1999';
+    const protocol = partyHost.includes('localhost') ? 'ws' : 'wss';
+    const url = `${protocol}://${partyHost}/party/${roomId}`;
+
+    // Set connection timeout (10 seconds)
+    connectionTimeout = setTimeout(() => {
+      if (!connected) {
+        error = 'Connection timeout. Please check your internet connection.';
+        if (socket) {
+          socket.close();
+          socket = null;
+        }
+      }
+    }, 10000);
+
+    try {
+      socket = new WebSocket(url);
+    } catch (e) {
+      error = 'Failed to connect to game server.';
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+        connectionTimeout = null;
+      }
+      return;
+    }
 
     socket.onopen = () => {
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+        connectionTimeout = null;
+      }
       connected = true;
       error = null;
     };
 
     socket.onclose = () => {
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+        connectionTimeout = null;
+      }
       connected = false;
     };
 
     socket.onerror = () => {
-      error = 'Connection failed';
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+        connectionTimeout = null;
+      }
+      error = 'Connection failed. Game server may be unavailable.';
       connected = false;
     };
 
@@ -121,6 +165,10 @@ export function createGameStore() {
 
   // Disconnect from server
   function disconnect() {
+    if (connectionTimeout) {
+      clearTimeout(connectionTimeout);
+      connectionTimeout = null;
+    }
     if (socket) {
       socket.close();
       socket = null;

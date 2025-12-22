@@ -12,7 +12,14 @@
     "roomCodePlaceholder": "Código de sala",
     "play": "¡Jugar!",
     "creating": "Creando sala...",
-    "joining": "Uniéndose a la sala..."
+    "joining": "Uniéndose a la sala...",
+    "back": "Atrás",
+    "features": {
+      "patterns": "Múltiples Patrones",
+      "multiplayer": "Multijugador",
+      "mobile": "Compatible con Móvil",
+      "languages": "Inglés y Español"
+    }
   },
   "game": {
     "waitingForHost": "Esperando que el anfitrión inicie...",
@@ -29,7 +36,11 @@
     "calledNumbers": "Números Cantados",
     "viewAllNumbers": "Ver Todos los Números",
     "numbersRemaining": "{count} números restantes",
-    "numbersCalled": "{count} números cantados"
+    "numbersCalled": "{count} números cantados",
+    "room": "Sala",
+    "backToHome": "Volver al Inicio",
+    "tabPlay": "Jugar",
+    "tabHost": "Anfitrión"
   },
   "bingo": {
     "bingo": "¡BINGO!",
@@ -104,6 +115,9 @@
   },
   "errors": {
     "connectionFailed": "Error de conexión",
+    "connectionTimeout": "Tiempo de conexión agotado. Por favor verifica tu conexión a internet.",
+    "serverNotConfigured": "Servidor de juego no configurado. Por favor configura VITE_PARTYKIT_HOST.",
+    "serverUnavailable": "Error de conexión. El servidor de juego puede no estar disponible.",
     "kicked": "Fuiste expulsado del juego",
     "roomNotFound": "Sala no encontrada",
     "nameTooShort": "El nombre debe tener al menos 2 caracteres"

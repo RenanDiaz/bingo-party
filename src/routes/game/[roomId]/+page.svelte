@@ -139,7 +139,7 @@
     <div class="card p-6 max-w-md text-center">
       <p class="text-red-400 mb-4">{store.error}</p>
       <button type="button" class="btn btn-primary" onclick={() => goto('/')}>
-        Back to Home
+        {$_('game.backToHome')}
       </button>
     </div>
   </div>
@@ -149,7 +149,7 @@
     <div class="card p-3 mb-4 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-3">
         <div>
-          <span class="text-white/50 text-sm">Room:</span>
+          <span class="text-white/50 text-sm">{$_('game.room')}:</span>
           <span class="text-white font-bold ml-1">{roomId}</span>
         </div>
         {#if store.currentPattern}
@@ -194,14 +194,14 @@
             class="flex-1 py-2 rounded-lg font-medium transition-colors {activeTab === 'play' ? 'bg-primary-500 text-white' : 'bg-white/10 text-white/70'}"
             onclick={() => activeTab = 'play'}
           >
-            Play
+            {$_('game.tabPlay')}
           </button>
           <button
             type="button"
             class="flex-1 py-2 rounded-lg font-medium transition-colors {activeTab === 'host' ? 'bg-primary-500 text-white' : 'bg-white/10 text-white/70'}"
             onclick={() => activeTab = 'host'}
           >
-            Host
+            {$_('game.tabHost')}
           </button>
         </div>
 
