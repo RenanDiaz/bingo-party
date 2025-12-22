@@ -12,7 +12,14 @@
     "roomCodePlaceholder": "Room code",
     "play": "Play!",
     "creating": "Creating room...",
-    "joining": "Joining room..."
+    "joining": "Joining room...",
+    "back": "Back",
+    "features": {
+      "patterns": "Multiple Patterns",
+      "multiplayer": "Multiplayer",
+      "mobile": "Mobile Friendly",
+      "languages": "English & Spanish"
+    }
   },
   "game": {
     "waitingForHost": "Waiting for host to start...",
@@ -29,7 +36,11 @@
     "calledNumbers": "Called Numbers",
     "viewAllNumbers": "View All Numbers",
     "numbersRemaining": "{count} numbers remaining",
-    "numbersCalled": "{count} numbers called"
+    "numbersCalled": "{count} numbers called",
+    "room": "Room",
+    "backToHome": "Back to Home",
+    "tabPlay": "Play",
+    "tabHost": "Host"
   },
   "bingo": {
     "bingo": "BINGO!",
@@ -104,6 +115,9 @@
   },
   "errors": {
     "connectionFailed": "Connection failed",
+    "connectionTimeout": "Connection timeout. Please check your internet connection.",
+    "serverNotConfigured": "Game server not configured. Please set VITE_PARTYKIT_HOST.",
+    "serverUnavailable": "Connection failed. Game server may be unavailable.",
     "kicked": "You were kicked from the game",
     "roomNotFound": "Room not found",
     "nameTooShort": "Name must be at least 2 characters"

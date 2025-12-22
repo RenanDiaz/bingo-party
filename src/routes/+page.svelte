@@ -141,7 +141,7 @@
             onclick={() => { mode = null; error = ''; }}
             disabled={loading}
           >
-            Back
+            {$_('landing.back')}
           </button>
           <button
             type="submit"
@@ -163,19 +163,19 @@
   <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 text-center max-w-2xl">
     <div class="card p-4">
       <div class="text-3xl mb-2">🎯</div>
-      <p class="text-white/70 text-sm">Multiple Patterns</p>
+      <p class="text-white/70 text-sm">{$_('landing.features.patterns')}</p>
     </div>
     <div class="card p-4">
       <div class="text-3xl mb-2">👥</div>
-      <p class="text-white/70 text-sm">Multiplayer</p>
+      <p class="text-white/70 text-sm">{$_('landing.features.multiplayer')}</p>
     </div>
     <div class="card p-4">
       <div class="text-3xl mb-2">📱</div>
-      <p class="text-white/70 text-sm">Mobile Friendly</p>
+      <p class="text-white/70 text-sm">{$_('landing.features.mobile')}</p>
     </div>
     <div class="card p-4">
       <div class="text-3xl mb-2">🌎</div>
-      <p class="text-white/70 text-sm">English & Spanish</p>
+      <p class="text-white/70 text-sm">{$_('landing.features.languages')}</p>
     </div>
   </div>
 </div>
