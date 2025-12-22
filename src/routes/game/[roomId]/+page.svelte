@@ -138,8 +138,8 @@
       </button>
     </div>
   </div>
-{:else if !store.connected}
-  <!-- Loading state -->
+{:else if !store.connected || !store.gameState || (store.cardPool.length === 0 && !store.myPlayer)}
+  <!-- Loading state - wait for connection, game state, and card pool -->
   <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
     <div class="text-center">
       <div class="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent mx-auto mb-4"></div>
