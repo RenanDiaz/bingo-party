@@ -103,7 +103,7 @@ export function createGameStore() {
 
     const partyHost = host || 'localhost:1999';
     const protocol = partyHost.includes('localhost') ? 'ws' : 'wss';
-    const url = `${protocol}://${partyHost}/parties/bingoparty/${roomId}`;
+    const url = `${protocol}://${partyHost}/parties/main/${roomId}`;
 
     // Set connection timeout (10 seconds)
     connectionTimeout = setTimeout(() => {
