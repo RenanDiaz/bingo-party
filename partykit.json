@@ -1,0 +1,5 @@
+{
+  "name": "bingoparty",
+  "main": "party/bingoServer.ts",
+  "compatibilityDate": "2024-01-01"
+}
