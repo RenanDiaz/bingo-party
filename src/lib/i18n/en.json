@@ -120,6 +120,7 @@
     "serverUnavailable": "Connection failed. Game server may be unavailable.",
     "kicked": "You were kicked from the game",
     "roomNotFound": "Room not found",
-    "nameTooShort": "Name must be at least 2 characters"
+    "nameTooShort": "Name must be at least 2 characters",
+    "navigationFailed": "Failed to navigate. Please try again."
   }
 }

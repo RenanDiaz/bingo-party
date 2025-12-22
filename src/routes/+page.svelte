@@ -32,16 +32,22 @@
       localStorage.setItem('bingo-player-name', playerName.trim());
     }
 
-    if (mode === 'create') {
-      const roomId = generateRoomId();
-      goto(`/game/${roomId}?name=${encodeURIComponent(playerName.trim())}&host=1`);
-    } else if (mode === 'join') {
-      if (!roomCode.trim()) {
-        error = $_('errors.roomNotFound');
-        loading = false;
-        return;
+    try {
+      if (mode === 'create') {
+        const roomId = generateRoomId();
+        await goto(`/game/${roomId}?name=${encodeURIComponent(playerName.trim())}&host=1`);
+      } else if (mode === 'join') {
+        if (!roomCode.trim()) {
+          error = $_('errors.roomNotFound');
+          loading = false;
+          return;
+        }
+        await goto(`/game/${roomCode.trim().toUpperCase()}?name=${encodeURIComponent(playerName.trim())}`);
       }
-      goto(`/game/${roomCode.trim().toUpperCase()}?name=${encodeURIComponent(playerName.trim())}`);
+    } catch (e) {
+      console.error('Navigation failed:', e);
+      error = $_('errors.navigationFailed') || 'Failed to navigate. Please try again.';
+      loading = false;
     }
   }
 

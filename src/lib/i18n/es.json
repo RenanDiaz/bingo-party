@@ -120,6 +120,7 @@
     "serverUnavailable": "Error de conexión. El servidor de juego puede no estar disponible.",
     "kicked": "Fuiste expulsado del juego",
     "roomNotFound": "Sala no encontrada",
-    "nameTooShort": "El nombre debe tener al menos 2 caracteres"
+    "nameTooShort": "El nombre debe tener al menos 2 caracteres",
+    "navigationFailed": "Error al navegar. Por favor intenta de nuevo."
   }
 }
