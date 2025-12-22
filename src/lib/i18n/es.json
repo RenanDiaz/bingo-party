@@ -1,0 +1,111 @@
+{
+  "app": {
+    "name": "BingoParty",
+    "tagline": "¡Juega Bingo con amigos y familia!"
+  },
+  "landing": {
+    "createGame": "Crear Juego",
+    "joinGame": "Unirse al Juego",
+    "enterName": "Ingresa tu nombre",
+    "enterRoomCode": "Ingresa el código de sala",
+    "namePlaceholder": "Tu nombre",
+    "roomCodePlaceholder": "Código de sala",
+    "play": "¡Jugar!",
+    "creating": "Creando sala...",
+    "joining": "Uniéndose a la sala..."
+  },
+  "game": {
+    "waitingForHost": "Esperando que el anfitrión inicie...",
+    "gameInProgress": "Juego en Progreso",
+    "gamePaused": "Juego Pausado",
+    "gameFinished": "Juego Terminado",
+    "timeout": "Pausa - Cambiar Cartones",
+    "selectCards": "Selecciona Tus Cartones",
+    "regenerateCards": "Regenerar Cartones",
+    "playingWith": "Jugando con {count} cartón(es)",
+    "ready": "¡Listo!",
+    "notReady": "Selecciona cartones para jugar",
+    "currentNumber": "Número Actual",
+    "calledNumbers": "Números Cantados",
+    "viewAllNumbers": "Ver Todos los Números",
+    "numbersRemaining": "{count} números restantes",
+    "numbersCalled": "{count} números cantados"
+  },
+  "bingo": {
+    "bingo": "¡BINGO!",
+    "claimBingo": "¡Cantar BINGO!",
+    "winner": "¡Ganador!",
+    "youWin": "¡Ganaste!",
+    "playerWins": "¡{player} Gana!",
+    "falseBingo": "Bingo Falso",
+    "invalidBingo": "Bingo Inválido",
+    "1stPlace": "1° Lugar",
+    "2ndPlace": "2° Lugar",
+    "3rdPlace": "3° Lugar",
+    "free": "GRATIS"
+  },
+  "host": {
+    "controls": "Controles del Anfitrión",
+    "callNext": "Cantar Siguiente",
+    "autoCall": "Canto Automático",
+    "manualCall": "Canto Manual",
+    "speed": "Velocidad",
+    "seconds": "{count} segundos",
+    "start": "Iniciar Juego",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "reset": "Reiniciar Juego",
+    "timeout": "Llamar Pausa",
+    "endTimeout": "Terminar Pausa",
+    "kickPlayer": "Expulsar",
+    "copyLink": "Copiar Enlace",
+    "linkCopied": "¡Enlace copiado!"
+  },
+  "pattern": {
+    "selectPattern": "Seleccionar Patrón",
+    "createCustom": "Crear Patrón Personalizado",
+    "preview": "Vista Previa del Patrón",
+    "horizontalLine": "Línea Horizontal",
+    "verticalLine": "Línea Vertical",
+    "diagonalLine": "Línea Diagonal",
+    "anyLine": "Cualquier Línea",
+    "fourCorners": "Cuatro Esquinas",
+    "blackout": "Cartón Lleno",
+    "letterX": "Letra X",
+    "letterT": "Letra T",
+    "letterL": "Letra L",
+    "plusSign": "Signo Más",
+    "pictureFrame": "Marco",
+    "postageStamp": "Sello de Correo",
+    "chevron": "Galón"
+  },
+  "players": {
+    "players": "Jugadores",
+    "online": "{count} jugadores en línea",
+    "host": "Anfitrión",
+    "you": "Tú",
+    "ready": "Listo",
+    "notReady": "No Listo",
+    "disconnected": "Desconectado"
+  },
+  "settings": {
+    "settings": "Configuración",
+    "autoMark": "Marcar Números Automáticamente",
+    "language": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español"
+  },
+  "cardSelector": {
+    "title": "Elige Tus Cartones",
+    "subtitle": "Selecciona 1-4 cartones para jugar",
+    "selected": "Seleccionado",
+    "confirm": "Confirmar Selección",
+    "regenerate": "Obtener Nuevos Cartones"
+  },
+  "errors": {
+    "connectionFailed": "Error de conexión",
+    "kicked": "Fuiste expulsado del juego",
+    "roomNotFound": "Sala no encontrada",
+    "nameTooShort": "El nombre debe tener al menos 2 caracteres"
+  }
+}

@@ -1,0 +1,355 @@
+<script lang="ts">
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
+  import { onMount, onDestroy } from 'svelte';
+  import { _ } from 'svelte-i18n';
+  import { getGameStore } from '$lib/stores/gameState.svelte';
+
+  import BingoCard from '$lib/components/BingoCard.svelte';
+  import CardSelector from '$lib/components/CardSelector.svelte';
+  import CalledNumberDisplay from '$lib/components/CalledNumberDisplay.svelte';
+  import CalledHistory from '$lib/components/CalledHistory.svelte';
+  import NumberBoardModal from '$lib/components/NumberBoardModal.svelte';
+  import HostControls from '$lib/components/HostControls.svelte';
+  import PlayerList from '$lib/components/PlayerList.svelte';
+  import BingoButton from '$lib/components/BingoButton.svelte';
+  import WinnerAnnouncement from '$lib/components/WinnerAnnouncement.svelte';
+  import PatternPreview from '$lib/components/PatternPreview.svelte';
+
+  const store = getGameStore();
+
+  let showNumberBoard = $state(false);
+  let showWinners = $state(false);
+  let linkCopied = $state(false);
+  let activeTab = $state<'play' | 'host'>('play');
+
+  // Get room ID and player name from URL
+  const roomId = $derived($page.params.roomId ?? '');
+  const playerName = $derived($page.url.searchParams.get('name') || '');
+
+  // Connect to room on mount
+  onMount(() => {
+    if (!browser) return;
+
+    if (!playerName || !roomId) {
+      goto('/');
+      return;
+    }
+
+    store.connect(roomId);
+
+    // Wait for connection and join
+    const checkConnection = setInterval(() => {
+      if (store.connected) {
+        store.joinRoom(playerName);
+        clearInterval(checkConnection);
+      }
+    }, 100);
+
+    return () => clearInterval(checkConnection);
+  });
+
+  onDestroy(() => {
+    if (browser) {
+      store.disconnect();
+    }
+  });
+
+  // Show winners when game finishes
+  $effect(() => {
+    if (store.gameState?.phase === 'finished' && store.gameState.winners.length > 0) {
+      showWinners = true;
+    }
+  });
+
+  // Redirect if kicked
+  $effect(() => {
+    if (store.kicked) {
+      goto('/?error=kicked');
+    }
+  });
+
+  async function copyRoomLink() {
+    if (!browser) return;
+
+    const url = `${window.location.origin}/game/${roomId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      linkCopied = true;
+      setTimeout(() => {
+        linkCopied = false;
+      }, 2000);
+    } catch {
+      // Fallback
+      const input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      linkCopied = true;
+      setTimeout(() => {
+        linkCopied = false;
+      }, 2000);
+    }
+  }
+
+  function handleCardSelect(cardIds: string[]) {
+    store.selectCards(cardIds);
+  }
+
+  function handleConfirmCards() {
+    store.setReady();
+  }
+
+  function handleMarkCell(cardId: string, row: number, col: number) {
+    store.markCell(cardId, row, col);
+  }
+
+  function handleClaimBingo() {
+    const { can, cardId } = store.canClaimBingo;
+    if (can && cardId) {
+      store.claimBingo(cardId);
+    }
+  }
+
+  // Derived state for convenience
+  const phase = $derived(store.gameState?.phase ?? 'lobby');
+  const isPlaying = $derived(phase === 'playing');
+  const isLobbyOrSelection = $derived(phase === 'lobby' || phase === 'cardSelection');
+  const hasSelectedCards = $derived(store.selectedCardIds.length > 0);
+</script>
+
+<svelte:head>
+  <title>{$_('app.name')} - Room {roomId}</title>
+</svelte:head>
+
+{#if !store.connected}
+  <!-- Loading state -->
+  <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent mx-auto mb-4"></div>
+      <p class="text-white/70">{$_('landing.joining')}</p>
+    </div>
+  </div>
+{:else if store.error}
+  <!-- Error state -->
+  <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+    <div class="card p-6 max-w-md text-center">
+      <p class="text-red-400 mb-4">{store.error}</p>
+      <button type="button" class="btn btn-primary" onclick={() => goto('/')}>
+        Back to Home
+      </button>
+    </div>
+  </div>
+{:else}
+  <div class="container mx-auto px-4 py-4">
+    <!-- Room info bar -->
+    <div class="card p-3 mb-4 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <div>
+          <span class="text-white/50 text-sm">Room:</span>
+          <span class="text-white font-bold ml-1">{roomId}</span>
+        </div>
+        {#if store.currentPattern}
+          <div class="flex items-center gap-2">
+            <PatternPreview pattern={store.currentPattern} size="small" />
+            <span class="text-white/70 text-sm">{store.currentPattern.name}</span>
+          </div>
+        {/if}
+      </div>
+      <button
+        type="button"
+        class="btn btn-secondary text-sm"
+        onclick={copyRoomLink}
+      >
+        {linkCopied ? $_('host.linkCopied') : $_('host.copyLink')}
+      </button>
+    </div>
+
+    <!-- Phase indicator -->
+    <div class="text-center mb-4">
+      {#if phase === 'lobby'}
+        <span class="text-white/70">{$_('game.waitingForHost')}</span>
+      {:else if phase === 'playing'}
+        <span class="text-green-400 font-medium">{$_('game.gameInProgress')}</span>
+      {:else if phase === 'paused'}
+        <span class="text-yellow-400 font-medium">{$_('game.gamePaused')}</span>
+      {:else if phase === 'timeout'}
+        <span class="text-yellow-400 font-medium">{$_('game.timeout')}</span>
+      {:else if phase === 'finished'}
+        <span class="text-accent-gold font-medium">{$_('game.gameFinished')}</span>
+      {/if}
+    </div>
+
+    <!-- Main game layout -->
+    <div class="grid lg:grid-cols-3 gap-4">
+      <!-- Left column: Host controls (desktop) or tabs (mobile) -->
+      {#if store.isHost}
+        <!-- Mobile tabs -->
+        <div class="lg:hidden flex gap-2 mb-4">
+          <button
+            type="button"
+            class="flex-1 py-2 rounded-lg font-medium transition-colors {activeTab === 'play' ? 'bg-primary-500 text-white' : 'bg-white/10 text-white/70'}"
+            onclick={() => activeTab = 'play'}
+          >
+            Play
+          </button>
+          <button
+            type="button"
+            class="flex-1 py-2 rounded-lg font-medium transition-colors {activeTab === 'host' ? 'bg-primary-500 text-white' : 'bg-white/10 text-white/70'}"
+            onclick={() => activeTab = 'host'}
+          >
+            Host
+          </button>
+        </div>
+
+        <!-- Desktop: always show host controls -->
+        <div class="hidden lg:block space-y-4">
+          {#if store.gameState}
+            <HostControls
+              phase={store.gameState.phase}
+              settings={store.gameState.settings}
+              currentPattern={store.gameState.currentPattern}
+              remainingNumbers={store.gameState.remainingNumbers.length}
+              onStart={() => store.startGame()}
+              onPause={() => store.pauseGame()}
+              onResume={() => store.resumeGame()}
+              onReset={() => store.resetGame()}
+              onCallNext={() => store.callNext()}
+              onToggleAutoCall={(enabled) => store.toggleAutoCall(enabled)}
+              onSetSpeed={(ms) => store.setSpeed(ms)}
+              onSetPattern={(pattern) => store.setPattern(pattern)}
+              onCreateTimeout={(seconds) => store.createTimeout(seconds)}
+              onEndTimeout={() => store.endTimeout()}
+            />
+          {/if}
+          <PlayerList
+            players={store.allPlayers}
+            currentPlayerId={store.myPlayerId}
+            isHost={store.isHost}
+            onKick={(id) => store.kickPlayer(id)}
+          />
+        </div>
+      {/if}
+
+      <!-- Center column: Cards or Card Selection -->
+      <div class="{store.isHost ? 'lg:col-span-1' : 'lg:col-span-2'} {store.isHost && activeTab === 'host' ? 'hidden lg:block' : ''}">
+        {#if isLobbyOrSelection && !hasSelectedCards}
+          <!-- Card selection -->
+          <CardSelector
+            cards={store.cardPool}
+            selectedIds={store.selectedCardIds}
+            onSelect={handleCardSelect}
+            onRegenerate={() => store.regenerateCards()}
+            onConfirm={handleConfirmCards}
+            disabled={phase !== 'lobby'}
+          />
+        {:else}
+          <!-- Game view -->
+          <div class="space-y-4">
+            <!-- Current number display -->
+            {#if store.gameState?.currentNumber}
+              <CalledNumberDisplay
+                currentNumber={store.gameState.currentNumber}
+              />
+            {/if}
+
+            <!-- Called history -->
+            {#if store.gameState?.callHistory}
+              <CalledHistory callHistory={store.gameState.callHistory} />
+            {/if}
+
+            <!-- Player's cards -->
+            <div class="grid grid-cols-1 {store.myCards.length > 1 ? 'md:grid-cols-2' : ''} gap-4">
+              {#each store.myCards as card (card.id)}
+                {@const cardMarkedCells = store.markedCells[card.id] || []}
+                {@const cardWinningCells = store.winningCells[card.id]}
+                <BingoCard
+                  {card}
+                  markedCells={cardMarkedCells}
+                  winningCells={cardWinningCells}
+                  calledNumbers={store.gameState?.calledNumbers ?? []}
+                  onMark={(row, col) => handleMarkCell(card.id, row, col)}
+                  disabled={!isPlaying}
+                />
+              {/each}
+            </div>
+
+            <!-- Bingo button -->
+            <BingoButton
+              canClaim={store.canClaimBingo.can}
+              onClaim={handleClaimBingo}
+              disabled={!isPlaying}
+            />
+
+            <!-- View all numbers button -->
+            <button
+              type="button"
+              class="btn btn-secondary w-full"
+              onclick={() => showNumberBoard = true}
+            >
+              {$_('game.viewAllNumbers')}
+            </button>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Right column: Number board (desktop) -->
+      {#if !store.isHost}
+        <div class="hidden lg:block">
+          <PlayerList
+            players={store.allPlayers}
+            currentPlayerId={store.myPlayerId}
+            isHost={store.isHost}
+          />
+        </div>
+      {/if}
+
+      <!-- Mobile host controls (when host tab is active) -->
+      {#if store.isHost && activeTab === 'host'}
+        <div class="lg:hidden space-y-4">
+          {#if store.gameState}
+            <HostControls
+              phase={store.gameState.phase}
+              settings={store.gameState.settings}
+              currentPattern={store.gameState.currentPattern}
+              remainingNumbers={store.gameState.remainingNumbers.length}
+              onStart={() => store.startGame()}
+              onPause={() => store.pauseGame()}
+              onResume={() => store.resumeGame()}
+              onReset={() => store.resetGame()}
+              onCallNext={() => store.callNext()}
+              onToggleAutoCall={(enabled) => store.toggleAutoCall(enabled)}
+              onSetSpeed={(ms) => store.setSpeed(ms)}
+              onSetPattern={(pattern) => store.setPattern(pattern)}
+              onCreateTimeout={(seconds) => store.createTimeout(seconds)}
+              onEndTimeout={() => store.endTimeout()}
+            />
+          {/if}
+          <PlayerList
+            players={store.allPlayers}
+            currentPlayerId={store.myPlayerId}
+            isHost={store.isHost}
+            onKick={(id) => store.kickPlayer(id)}
+          />
+        </div>
+      {/if}
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <NumberBoardModal
+    calledNumbers={store.gameState?.calledNumbers ?? []}
+    currentNumber={store.gameState?.currentNumber ?? null}
+    isOpen={showNumberBoard}
+    onClose={() => showNumberBoard = false}
+  />
+
+  <WinnerAnnouncement
+    winners={store.gameState?.winners ?? []}
+    currentPlayerId={store.myPlayerId}
+    onClose={() => showWinners = false}
+  />
+{/if}

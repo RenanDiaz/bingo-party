@@ -1,0 +1,111 @@
+{
+  "app": {
+    "name": "BingoParty",
+    "tagline": "Play Bingo with friends and family!"
+  },
+  "landing": {
+    "createGame": "Create Game",
+    "joinGame": "Join Game",
+    "enterName": "Enter your name",
+    "enterRoomCode": "Enter room code",
+    "namePlaceholder": "Your name",
+    "roomCodePlaceholder": "Room code",
+    "play": "Play!",
+    "creating": "Creating room...",
+    "joining": "Joining room..."
+  },
+  "game": {
+    "waitingForHost": "Waiting for host to start...",
+    "gameInProgress": "Game in Progress",
+    "gamePaused": "Game Paused",
+    "gameFinished": "Game Finished",
+    "timeout": "Timeout - Change Cards",
+    "selectCards": "Select Your Cards",
+    "regenerateCards": "Regenerate Cards",
+    "playingWith": "Playing with {count} card(s)",
+    "ready": "Ready!",
+    "notReady": "Select cards to play",
+    "currentNumber": "Current Number",
+    "calledNumbers": "Called Numbers",
+    "viewAllNumbers": "View All Numbers",
+    "numbersRemaining": "{count} numbers remaining",
+    "numbersCalled": "{count} numbers called"
+  },
+  "bingo": {
+    "bingo": "BINGO!",
+    "claimBingo": "Claim BINGO!",
+    "winner": "Winner!",
+    "youWin": "You Win!",
+    "playerWins": "{player} Wins!",
+    "falseBingo": "False Bingo",
+    "invalidBingo": "Invalid Bingo",
+    "1stPlace": "1st Place",
+    "2ndPlace": "2nd Place",
+    "3rdPlace": "3rd Place",
+    "free": "FREE"
+  },
+  "host": {
+    "controls": "Host Controls",
+    "callNext": "Call Next",
+    "autoCall": "Auto Call",
+    "manualCall": "Manual Call",
+    "speed": "Speed",
+    "seconds": "{count} seconds",
+    "start": "Start Game",
+    "pause": "Pause",
+    "resume": "Resume",
+    "reset": "Reset Game",
+    "timeout": "Call Timeout",
+    "endTimeout": "End Timeout",
+    "kickPlayer": "Kick",
+    "copyLink": "Copy Room Link",
+    "linkCopied": "Link copied!"
+  },
+  "pattern": {
+    "selectPattern": "Select Pattern",
+    "createCustom": "Create Custom Pattern",
+    "preview": "Pattern Preview",
+    "horizontalLine": "Horizontal Line",
+    "verticalLine": "Vertical Line",
+    "diagonalLine": "Diagonal Line",
+    "anyLine": "Any Line",
+    "fourCorners": "Four Corners",
+    "blackout": "Blackout",
+    "letterX": "Letter X",
+    "letterT": "Letter T",
+    "letterL": "Letter L",
+    "plusSign": "Plus Sign",
+    "pictureFrame": "Picture Frame",
+    "postageStamp": "Postage Stamp",
+    "chevron": "Chevron"
+  },
+  "players": {
+    "players": "Players",
+    "online": "{count} players online",
+    "host": "Host",
+    "you": "You",
+    "ready": "Ready",
+    "notReady": "Not Ready",
+    "disconnected": "Disconnected"
+  },
+  "settings": {
+    "settings": "Settings",
+    "autoMark": "Auto Mark Numbers",
+    "language": "Language",
+    "english": "English",
+    "spanish": "Spanish"
+  },
+  "cardSelector": {
+    "title": "Choose Your Cards",
+    "subtitle": "Select 1-4 cards to play with",
+    "selected": "Selected",
+    "confirm": "Confirm Selection",
+    "regenerate": "Get New Cards"
+  },
+  "errors": {
+    "connectionFailed": "Connection failed",
+    "kicked": "You were kicked from the game",
+    "roomNotFound": "Room not found",
+    "nameTooShort": "Name must be at least 2 characters"
+  }
+}
