@@ -44,6 +44,9 @@
       if (store.connected) {
         store.joinRoom(playerName);
         clearInterval(checkConnection);
+      } else if (store.error) {
+        // Stop checking if there's an error
+        clearInterval(checkConnection);
       }
     }, 100);
 
@@ -125,15 +128,7 @@
   <title>{$_('app.name')} - Room {roomId}</title>
 </svelte:head>
 
-{#if !store.connected}
-  <!-- Loading state -->
-  <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent mx-auto mb-4"></div>
-      <p class="text-white/70">{$_('landing.joining')}</p>
-    </div>
-  </div>
-{:else if store.error}
+{#if store.error}
   <!-- Error state -->
   <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
     <div class="card p-6 max-w-md text-center">
@@ -141,6 +136,14 @@
       <button type="button" class="btn btn-primary" onclick={() => goto('/')}>
         {$_('game.backToHome')}
       </button>
+    </div>
+  </div>
+{:else if !store.connected}
+  <!-- Loading state -->
+  <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent mx-auto mb-4"></div>
+      <p class="text-white/70">{$_('landing.joining')}</p>
     </div>
   </div>
 {:else}
