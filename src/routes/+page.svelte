@@ -103,7 +103,7 @@
       </div>
     {:else}
       <!-- Form -->
-      <form onsubmit={handleSubmit} class="space-y-4">
+      <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-4">
         <div>
           <label for="playerName" class="block text-white/70 text-sm mb-1">
             {$_('landing.enterName')}
