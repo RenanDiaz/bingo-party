@@ -66,11 +66,26 @@
     }
   });
 
-  // Show winners when game finishes
+  // Track previous winners count to detect new winners
+  let previousWinnersCount = $state(0);
+
+  // Show winners when a new winner is added or game finishes
   $effect(() => {
-    if (store.gameState?.phase === 'finished' && store.gameState.winners.length > 0) {
+    const currentWinners = store.gameState?.winners ?? [];
+    const currentPhase = store.gameState?.phase;
+
+    // Show modal when a new winner is added
+    if (currentWinners.length > previousWinnersCount) {
       showWinners = true;
     }
+
+    // Also show when game finishes (in case we missed a winner)
+    if (currentPhase === 'finished' && currentWinners.length > 0) {
+      showWinners = true;
+    }
+
+    // Update the count for next comparison
+    previousWinnersCount = currentWinners.length;
   });
 
   // Redirect if kicked
