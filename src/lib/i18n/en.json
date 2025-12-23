@@ -128,5 +128,12 @@
     "roomNotFound": "Room not found",
     "nameTooShort": "Name must be at least 2 characters",
     "navigationFailed": "Failed to navigate. Please try again."
+  },
+  "navigation": {
+    "leaveTitle": "Leave Game?",
+    "leaveGameMessage": "A game is in progress. If you leave, you won't be able to rejoin with your current cards.",
+    "leaveHostMessage": "You are the host. If you leave, there's no way to recover the host session and the game will be unplayable.",
+    "stay": "Stay",
+    "leave": "Leave"
   }
 }

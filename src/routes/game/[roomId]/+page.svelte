@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
+  import { goto, beforeNavigate } from '$app/navigation';
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import { _ } from 'svelte-i18n';
@@ -16,6 +16,7 @@
   import BingoButton from '$lib/components/BingoButton.svelte';
   import WinnerAnnouncement from '$lib/components/WinnerAnnouncement.svelte';
   import PatternPreview from '$lib/components/PatternPreview.svelte';
+  import ConfirmModal from '$lib/components/ConfirmModal.svelte';
 
   const store = getGameStore();
 
@@ -23,6 +24,8 @@
   let showWinners = $state(false);
   let linkCopied = $state(false);
   let activeTab = $state<'play' | 'host'>('play');
+  let showLeaveConfirm = $state(false);
+  let pendingNavigation = $state<(() => void) | null>(null);
 
   // Get room ID and player name from URL
   const roomId = $derived($page.params.roomId ?? '');
@@ -123,6 +126,60 @@
   const isLobbyOrSelection = $derived(phase === 'lobby' || phase === 'cardSelection');
   const hasSelectedCards = $derived(store.selectedCardIds.length > 0);
   const isReadyToPlay = $derived(store.myPlayer?.readyToPlay ?? false);
+
+  // Navigation prevention - block if game started or user is host
+  const gameStarted = $derived(phase !== 'lobby' && phase !== 'cardSelection');
+  const shouldPreventNavigation = $derived(store.isHost || gameStarted);
+  const leaveMessage = $derived(
+    store.isHost ? $_('navigation.leaveHostMessage') : $_('navigation.leaveGameMessage')
+  );
+
+  // Prevent in-app navigation (SvelteKit)
+  beforeNavigate((navigation) => {
+    // Don't block if kicked or if we shouldn't prevent navigation
+    if (store.kicked || !shouldPreventNavigation) return;
+
+    // Show confirmation modal
+    navigation.cancel();
+    pendingNavigation = () => {
+      // Force navigation by temporarily allowing it
+      store.disconnect();
+      if (navigation.to?.url) {
+        goto(navigation.to.url.pathname + navigation.to.url.search);
+      }
+    };
+    showLeaveConfirm = true;
+  });
+
+  // Prevent browser navigation (close tab, refresh, external link)
+  $effect(() => {
+    if (!browser) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (shouldPreventNavigation && !store.kicked) {
+        event.preventDefault();
+        // Modern browsers require returnValue to be set
+        event.returnValue = '';
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  });
+
+  function handleLeaveConfirm() {
+    showLeaveConfirm = false;
+    if (pendingNavigation) {
+      pendingNavigation();
+      pendingNavigation = null;
+    }
+  }
+
+  function handleLeaveCancel() {
+    showLeaveConfirm = false;
+    pendingNavigation = null;
+  }
 </script>
 
 <svelte:head>
@@ -382,3 +439,14 @@
     onClose={() => showWinners = false}
   />
 {/if}
+
+<!-- Leave confirmation modal (always rendered outside the main conditional) -->
+<ConfirmModal
+  isOpen={showLeaveConfirm}
+  title={$_('navigation.leaveTitle')}
+  message={leaveMessage}
+  confirmText={$_('navigation.leave')}
+  cancelText={$_('navigation.stay')}
+  onConfirm={handleLeaveConfirm}
+  onCancel={handleLeaveCancel}
+/>
