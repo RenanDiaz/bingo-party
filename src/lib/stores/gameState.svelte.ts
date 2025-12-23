@@ -31,6 +31,15 @@ export function createGameStore() {
   // WebSocket connection
   let socket: WebSocket | null = null;
   let connectionTimeout: ReturnType<typeof setTimeout> | null = null;
+  let currentRoomId: string | null = null;
+  let currentPlayerName: string | null = null;
+  let isReconnecting = $state<boolean>(false);
+  let retryCount = 0;
+  let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  let intentionalDisconnect = false;
+
+  const MAX_RETRIES = 5;
+  const BASE_RETRY_DELAY = 1000; // 1 second
 
   // Derived state
   const myPlayer = $derived(
@@ -88,8 +97,15 @@ export function createGameStore() {
   );
 
   // Connect to PartyKit server
-  function connect(roomId: string) {
+  function connect(roomId: string, isRetry: boolean = false) {
     if (!browser) return;
+
+    // Store room ID for reconnection
+    if (!isRetry) {
+      currentRoomId = roomId;
+      intentionalDisconnect = false;
+      retryCount = 0;
+    }
 
     const host = import.meta.env.VITE_PARTYKIT_HOST;
 
@@ -98,6 +114,7 @@ export function createGameStore() {
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       if (!isLocalhost) {
         error = 'Game server not configured. Please set VITE_PARTYKIT_HOST.';
+        isReconnecting = false;
         return;
       }
     }
@@ -109,22 +126,23 @@ export function createGameStore() {
     // Set connection timeout (10 seconds)
     connectionTimeout = setTimeout(() => {
       if (!connected) {
-        error = 'Connection timeout. Please check your internet connection.';
         if (socket) {
           socket.close();
           socket = null;
         }
+        // Trigger reconnection attempt
+        handleConnectionFailure('Connection timeout. Please check your internet connection.');
       }
     }, 10000);
 
     try {
       socket = new WebSocket(url);
     } catch (e) {
-      error = 'Failed to connect to game server.';
       if (connectionTimeout) {
         clearTimeout(connectionTimeout);
         connectionTimeout = null;
       }
+      handleConnectionFailure('Failed to connect to game server.');
       return;
     }
 
@@ -133,8 +151,17 @@ export function createGameStore() {
         clearTimeout(connectionTimeout);
         connectionTimeout = null;
       }
+
+      const wasReconnecting = isReconnecting;
       connected = true;
       error = null;
+      isReconnecting = false;
+      retryCount = 0;
+
+      // Auto-rejoin room after reconnection
+      if (wasReconnecting && currentPlayerName) {
+        send({ type: 'joinRoom', playerName: currentPlayerName });
+      }
     };
 
     socket.onclose = () => {
@@ -143,6 +170,11 @@ export function createGameStore() {
         connectionTimeout = null;
       }
       connected = false;
+
+      // Attempt reconnection if not intentionally disconnected
+      if (!intentionalDisconnect && currentRoomId) {
+        attemptReconnection();
+      }
     };
 
     socket.onerror = () => {
@@ -150,8 +182,8 @@ export function createGameStore() {
         clearTimeout(connectionTimeout);
         connectionTimeout = null;
       }
-      error = 'Connection failed. Game server may be unavailable.';
       connected = false;
+      // Note: onerror is usually followed by onclose, so reconnection will be handled there
     };
 
     socket.onmessage = (event) => {
@@ -164,17 +196,66 @@ export function createGameStore() {
     };
   }
 
+  // Handle connection failure
+  function handleConnectionFailure(errorMessage: string) {
+    if (intentionalDisconnect) {
+      error = null;
+      isReconnecting = false;
+      return;
+    }
+
+    if (retryCount < MAX_RETRIES && currentRoomId) {
+      attemptReconnection();
+    } else {
+      error = errorMessage;
+      isReconnecting = false;
+    }
+  }
+
+  // Attempt to reconnect with exponential backoff
+  function attemptReconnection() {
+    if (intentionalDisconnect || !currentRoomId || retryCount >= MAX_RETRIES) {
+      if (retryCount >= MAX_RETRIES) {
+        error = 'Connection failed. Game server may be unavailable.';
+        isReconnecting = false;
+      }
+      return;
+    }
+
+    isReconnecting = true;
+    retryCount++;
+
+    // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+    const delay = Math.min(BASE_RETRY_DELAY * Math.pow(2, retryCount - 1), 16000);
+
+    reconnectTimeout = setTimeout(() => {
+      if (currentRoomId && !intentionalDisconnect) {
+        connect(currentRoomId, true);
+      }
+    }, delay);
+  }
+
   // Disconnect from server
   function disconnect() {
+    intentionalDisconnect = true;
+
     if (connectionTimeout) {
       clearTimeout(connectionTimeout);
       connectionTimeout = null;
+    }
+    if (reconnectTimeout) {
+      clearTimeout(reconnectTimeout);
+      reconnectTimeout = null;
     }
     if (socket) {
       socket.close();
       socket = null;
     }
     connected = false;
+    isReconnecting = false;
+    currentRoomId = null;
+    currentPlayerName = null;
+    retryCount = 0;
     gameState = null;
     myPlayerId = '';
     isHost = false;
@@ -345,6 +426,7 @@ export function createGameStore() {
 
   // Player actions
   function joinRoom(playerName: string) {
+    currentPlayerName = playerName;
     send({ type: 'joinRoom', playerName });
   }
 
@@ -449,6 +531,7 @@ export function createGameStore() {
     get myPlayerId() { return myPlayerId; },
     get isHost() { return isHost; },
     get connected() { return connected; },
+    get isReconnecting() { return isReconnecting; },
     get error() { return error; },
     get kicked() { return kicked; },
     get cardPool() { return cardPool; },
