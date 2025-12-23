@@ -48,6 +48,7 @@ export function createPlayer(
     markedCells: {},
     autoMark: false,
     readyToPlay: false,
+    highlightCalledNumbers: true, // Default to enabled
   };
 }
 
@@ -132,14 +133,35 @@ export function selectCards(
   };
 }
 
-// Regenerate cards for a player
+// Regenerate cards for a player (optionally preserving selected cards)
 export function regenerateCards(
   state: BingoGameState,
-  playerId: string
+  playerId: string,
+  preserveSelected: boolean = false
 ): BingoGameState {
   const player = state.players[playerId];
   if (!player) return state;
 
+  if (preserveSelected && player.selectedCardIds.length > 0) {
+    // Keep selected cards and generate new cards for the remaining slots
+    const selectedCards = player.cards.filter(c => player.selectedCardIds.includes(c.id));
+    const remainingSlots = CARD_POOL_SIZE - selectedCards.length;
+    const newCards = generateCardPool(remainingSlots);
+
+    return {
+      ...state,
+      players: {
+        ...state.players,
+        [playerId]: {
+          ...player,
+          cards: [...selectedCards, ...newCards],
+          // Keep selectedCardIds and markedCells as they are
+        },
+      },
+    };
+  }
+
+  // Full regeneration - clear everything
   return {
     ...state,
     players: {
@@ -267,6 +289,32 @@ export function toggleAutoMark(
       [playerId]: {
         ...player,
         autoMark: enabled,
+      },
+    },
+  };
+}
+
+// Toggle highlight called numbers for a player
+export function toggleHighlightCalledNumbers(
+  state: BingoGameState,
+  playerId: string,
+  enabled: boolean
+): BingoGameState {
+  const player = state.players[playerId];
+  if (!player) return state;
+
+  // Only allow if the host setting permits it
+  if (enabled && !state.settings.allowHighlightCalledNumbers) {
+    return state;
+  }
+
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...player,
+        highlightCalledNumbers: enabled,
       },
     },
   };

@@ -5,10 +5,11 @@
   interface Props {
     winners: Winner[];
     currentPlayerId: string;
+    isOpen?: boolean;
     onClose?: () => void;
   }
 
-  let { winners, currentPlayerId, onClose }: Props = $props();
+  let { winners, currentPlayerId, isOpen = true, onClose }: Props = $props();
 
   const sortedWinners = $derived(
     [...winners].sort((a, b) => a.place - b.place)
@@ -41,7 +42,7 @@
   }
 </script>
 
-{#if winners.length > 0}
+{#if isOpen && winners.length > 0}
   <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
     <div class="card p-6 max-w-md w-full text-center space-y-6 animate-bounce-in">
       <!-- Confetti effect placeholder -->

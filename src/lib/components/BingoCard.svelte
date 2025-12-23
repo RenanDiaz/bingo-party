@@ -9,6 +9,7 @@
     markedCells: boolean[][];
     winningCells?: boolean[][];
     calledNumbers?: number[];
+    highlightCalled?: boolean;
     onMark?: (row: number, col: number) => void;
     disabled?: boolean;
     compact?: boolean;
@@ -19,6 +20,7 @@
     markedCells,
     winningCells = [],
     calledNumbers = [],
+    highlightCalled = false,
     onMark,
     disabled = false,
     compact = false,
@@ -58,8 +60,9 @@
         ? 'bingo-cell bingo-cell-free'
         : 'bingo-cell bingo-cell-marked';
     }
-    if (isCalled && !disabled) {
-      return 'bingo-cell bingo-cell-unmarked ring-2 ring-accent-gold';
+    // Highlight called but unmarked numbers if the setting is enabled
+    if (isCalled && !disabled && highlightCalled) {
+      return 'bingo-cell bingo-cell-called ring-2 ring-accent-gold bg-accent-gold/20';
     }
     return 'bingo-cell bingo-cell-unmarked';
   }

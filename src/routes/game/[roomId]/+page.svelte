@@ -122,6 +122,7 @@
   const isPlaying = $derived(phase === 'playing');
   const isLobbyOrSelection = $derived(phase === 'lobby' || phase === 'cardSelection');
   const hasSelectedCards = $derived(store.selectedCardIds.length > 0);
+  const isReadyToPlay = $derived(store.myPlayer?.readyToPlay ?? false);
 </script>
 
 <svelte:head>
@@ -208,44 +209,47 @@
           </button>
         </div>
 
-        <!-- Desktop: always show host controls -->
-        <div class="hidden lg:block space-y-4">
-          {#if store.gameState}
-            <HostControls
-              phase={store.gameState.phase}
-              settings={store.gameState.settings}
-              currentPattern={store.gameState.currentPattern}
-              remainingNumbers={store.gameState.remainingNumbers.length}
-              onStart={() => store.startGame()}
-              onPause={() => store.pauseGame()}
-              onResume={() => store.resumeGame()}
-              onReset={() => store.resetGame()}
-              onCallNext={() => store.callNext()}
-              onToggleAutoCall={(enabled) => store.toggleAutoCall(enabled)}
-              onSetSpeed={(ms) => store.setSpeed(ms)}
-              onSetPattern={(pattern) => store.setPattern(pattern)}
-              onCreateTimeout={(seconds) => store.createTimeout(seconds)}
-              onEndTimeout={() => store.endTimeout()}
+        <!-- Desktop: sticky host controls sidebar -->
+        <div class="hidden lg:block">
+          <div class="sticky top-4 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
+            {#if store.gameState}
+              <HostControls
+                phase={store.gameState.phase}
+                settings={store.gameState.settings}
+                currentPattern={store.gameState.currentPattern}
+                remainingNumbers={store.gameState.remainingNumbers.length}
+                onStart={() => store.startGame()}
+                onPause={() => store.pauseGame()}
+                onResume={() => store.resumeGame()}
+                onReset={() => store.resetGame()}
+                onCallNext={() => store.callNext()}
+                onToggleAutoCall={(enabled) => store.toggleAutoCall(enabled)}
+                onToggleAllowHighlight={(enabled) => store.toggleAllowHighlight(enabled)}
+                onSetSpeed={(ms) => store.setSpeed(ms)}
+                onSetPattern={(pattern) => store.setPattern(pattern)}
+                onCreateTimeout={(seconds) => store.createTimeout(seconds)}
+                onEndTimeout={() => store.endTimeout()}
+              />
+            {/if}
+            <PlayerList
+              players={store.allPlayers}
+              currentPlayerId={store.myPlayerId}
+              isHost={store.isHost}
+              onKick={(id) => store.kickPlayer(id)}
             />
-          {/if}
-          <PlayerList
-            players={store.allPlayers}
-            currentPlayerId={store.myPlayerId}
-            isHost={store.isHost}
-            onKick={(id) => store.kickPlayer(id)}
-          />
+          </div>
         </div>
       {/if}
 
       <!-- Center column: Cards or Card Selection -->
-      <div class="{store.isHost ? 'lg:col-span-1' : 'lg:col-span-2'} {store.isHost && activeTab === 'host' ? 'hidden lg:block' : ''}">
-        {#if isLobbyOrSelection && !hasSelectedCards}
-          <!-- Card selection -->
+      <div class="{store.isHost ? 'lg:col-span-2' : 'lg:col-span-2'} {store.isHost && activeTab === 'host' ? 'hidden lg:block' : ''}">
+        {#if isLobbyOrSelection && !isReadyToPlay}
+          <!-- Card selection - show until player confirms their selection -->
           <CardSelector
             cards={store.cardPool}
             selectedIds={store.selectedCardIds}
             onSelect={handleCardSelect}
-            onRegenerate={() => store.regenerateCards()}
+            onRegenerate={(preserveSelected) => store.regenerateCards(preserveSelected)}
             onConfirm={handleConfirmCards}
             disabled={phase !== 'lobby'}
           />
@@ -264,16 +268,36 @@
               <CalledHistory callHistory={store.gameState.callHistory} />
             {/if}
 
+            <!-- Player preferences -->
+            {#if store.gameState?.settings.allowHighlightCalledNumbers}
+              <div class="flex items-center justify-between bg-white/5 rounded-lg p-3">
+                <span class="text-white/80 text-sm">{$_('game.highlightCalledNumbers')}</span>
+                <button
+                  type="button"
+                  class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {store.myPlayer?.highlightCalledNumbers ? 'bg-primary-500' : 'bg-white/20'}"
+                  onclick={() => store.toggleHighlightCalledNumbers(!store.myPlayer?.highlightCalledNumbers)}
+                  aria-label={$_('game.highlightCalledNumbers')}
+                  aria-pressed={store.myPlayer?.highlightCalledNumbers ?? false}
+                >
+                  <span
+                    class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {store.myPlayer?.highlightCalledNumbers ? 'translate-x-6' : 'translate-x-1'}"
+                  ></span>
+                </button>
+              </div>
+            {/if}
+
             <!-- Player's cards -->
             <div class="grid grid-cols-1 {store.myCards.length > 1 ? 'md:grid-cols-2' : ''} gap-4">
               {#each store.myCards as card (card.id)}
                 {@const cardMarkedCells = store.markedCells[card.id] || []}
                 {@const cardWinningCells = store.winningCells[card.id]}
+                {@const shouldHighlight = store.gameState?.settings.allowHighlightCalledNumbers && store.myPlayer?.highlightCalledNumbers}
                 <BingoCard
                   {card}
                   markedCells={cardMarkedCells}
                   winningCells={cardWinningCells}
                   calledNumbers={store.gameState?.calledNumbers ?? []}
+                  highlightCalled={shouldHighlight ?? false}
                   onMark={(row, col) => handleMarkCell(card.id, row, col)}
                   disabled={!isPlaying}
                 />
@@ -325,6 +349,7 @@
               onReset={() => store.resetGame()}
               onCallNext={() => store.callNext()}
               onToggleAutoCall={(enabled) => store.toggleAutoCall(enabled)}
+              onToggleAllowHighlight={(enabled) => store.toggleAllowHighlight(enabled)}
               onSetSpeed={(ms) => store.setSpeed(ms)}
               onSetPattern={(pattern) => store.setPattern(pattern)}
               onCreateTimeout={(seconds) => store.createTimeout(seconds)}
@@ -353,6 +378,7 @@
   <WinnerAnnouncement
     winners={store.gameState?.winners ?? []}
     currentPlayerId={store.myPlayerId}
+    isOpen={showWinners}
     onClose={() => showWinners = false}
   />
 {/if}

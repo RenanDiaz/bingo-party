@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS = {
   allowMultipleWinners: true,
   maxWinners: 3,
   requireAllPlayersReady: false,
+  allowHighlightCalledNumbers: true, // Allow players to highlight called numbers by default
 };
 
 // Column colors (Tailwind class names)

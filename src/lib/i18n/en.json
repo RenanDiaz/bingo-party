@@ -40,7 +40,8 @@
     "room": "Room",
     "backToHome": "Back to Home",
     "tabPlay": "Play",
-    "tabHost": "Host"
+    "tabHost": "Host",
+    "highlightCalledNumbers": "Highlight Called Numbers"
   },
   "bingo": {
     "bingo": "BINGO!",
@@ -70,7 +71,9 @@
     "endTimeout": "End Timeout",
     "kickPlayer": "Kick",
     "copyLink": "Copy Room Link",
-    "linkCopied": "Link copied!"
+    "linkCopied": "Link copied!",
+    "sessionSettings": "Session Settings",
+    "allowHighlight": "Allow Highlight Called Numbers"
   },
   "pattern": {
     "selectPattern": "Select Pattern",
@@ -111,7 +114,10 @@
     "subtitle": "Select 1-4 cards to play with",
     "selected": "Selected",
     "confirm": "Confirm Selection",
-    "regenerate": "Get New Cards"
+    "regenerate": "Get New Cards",
+    "regenerateOthers": "Get New Options",
+    "regenerateOthersTooltip": "Keep your selected cards, get new options for the rest",
+    "regenerateAll": "Replace All"
   },
   "errors": {
     "connectionFailed": "Connection failed",
