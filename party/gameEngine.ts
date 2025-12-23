@@ -108,6 +108,13 @@ export function selectCards(
   const player = state.players[playerId];
   if (!player) return state;
 
+  // DEBUG: Log player's readyToPlay BEFORE any modifications
+  console.log('[DEBUG] selectCards - player BEFORE:', {
+    playerId,
+    readyToPlay: player.readyToPlay,
+    selectedCardIds: player.selectedCardIds,
+  });
+
   // Validate card IDs belong to player
   const validCardIds = cardIds.filter(id =>
     player.cards.some(card => card.id === id)
@@ -124,16 +131,25 @@ export function selectCards(
     markedCells[cardId] = createEmptyMarkedGrid();
   }
 
+  const newPlayer = {
+    ...player,
+    selectedCardIds: validCardIds,
+    markedCells,
+    // Don't set readyToPlay here - only set it when player confirms via playerReady
+  };
+
+  // DEBUG: Log player's readyToPlay AFTER modifications
+  console.log('[DEBUG] selectCards - player AFTER:', {
+    playerId,
+    readyToPlay: newPlayer.readyToPlay,
+    selectedCardIds: newPlayer.selectedCardIds,
+  });
+
   return {
     ...state,
     players: {
       ...state.players,
-      [playerId]: {
-        ...player,
-        selectedCardIds: validCardIds,
-        markedCells,
-        // Don't set readyToPlay here - only set it when player confirms via playerReady
-      },
+      [playerId]: newPlayer,
     },
   };
 }
