@@ -158,8 +158,12 @@
   const phase = $derived(store.gameState?.phase ?? 'lobby');
   const isPlaying = $derived(phase === 'playing');
   const isLobbyOrSelection = $derived(phase === 'lobby' || phase === 'cardSelection');
-  const hasSelectedCards = $derived(store.selectedCardIds.length > 0);
   const isReadyToPlay = $derived(store.myPlayer?.readyToPlay ?? false);
+
+  // Create derived states for card selection to ensure proper reactivity
+  // The getter pattern in the store doesn't always trigger component re-renders
+  const cardPool = $derived(store.cardPool);
+  const selectedCardIds = $derived(store.selectedCardIds);
 
   // Navigation prevention - block if game started or user is host
   const gameStarted = $derived(phase !== 'lobby' && phase !== 'cardSelection');
@@ -357,8 +361,8 @@
         {#if isLobbyOrSelection && !isReadyToPlay}
           <!-- Card selection - show until player confirms their selection -->
           <CardSelector
-            cards={store.cardPool}
-            selectedIds={store.selectedCardIds}
+            cards={cardPool}
+            selectedIds={selectedCardIds}
             onSelect={handleCardSelect}
             onRegenerate={(preserveSelected) => store.regenerateCards(preserveSelected)}
             onConfirm={handleConfirmCards}
