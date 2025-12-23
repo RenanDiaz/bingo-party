@@ -329,9 +329,10 @@ export function createGameStore() {
               [message.player.id]: message.player,
             },
           };
-          // Sync our own marked cells
+          // Sync our own state from server
           if (message.player.id === myPlayerId) {
             markedCells = { ...message.player.markedCells };
+            selectedCardIds = [...message.player.selectedCardIds];
           }
         }
         break;

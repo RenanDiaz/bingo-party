@@ -8,7 +8,7 @@ import type {
   Winner,
 } from '../shared/types';
 import { getColumnForNumber } from '../shared/types';
-import { DEFAULT_SETTINGS, CARD_POOL_SIZE } from '../shared/constants';
+import { DEFAULT_SETTINGS, CARD_POOL_SIZE, MAX_CARDS } from '../shared/constants';
 import { DEFAULT_PATTERN } from '../shared/patterns';
 import { generateCardPool, generateShuffledNumbers, createEmptyMarkedGrid } from './cardGenerator';
 import { checkPatternMatch, validateMarkedCells, getWinningCells } from './patternValidator';
@@ -112,6 +112,11 @@ export function selectCards(
   const validCardIds = cardIds.filter(id =>
     player.cards.some(card => card.id === id)
   );
+
+  // Enforce MAX_CARDS limit on server side
+  if (validCardIds.length > MAX_CARDS) {
+    validCardIds.length = MAX_CARDS;
+  }
 
   // Initialize marked cells for selected cards
   const markedCells: Record<string, boolean[][]> = {};
