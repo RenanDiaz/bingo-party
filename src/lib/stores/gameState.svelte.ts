@@ -322,6 +322,13 @@ export function createGameStore() {
 
       case 'playerUpdated':
         if (gameState) {
+          // DEBUG: Log the player update to trace readyToPlay changes
+          if (message.player.id === myPlayerId) {
+            console.log('[DEBUG] playerUpdated for self:', {
+              readyToPlay: message.player.readyToPlay,
+              selectedCardIds: message.player.selectedCardIds,
+            });
+          }
           gameState = {
             ...gameState,
             players: {

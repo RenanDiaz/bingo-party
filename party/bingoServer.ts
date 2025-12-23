@@ -304,6 +304,12 @@ export default class BingoServer implements Party.Server {
 
     const player = this.state.players[senderId];
     if (player) {
+      // DEBUG: Log what we're sending
+      console.log('[DEBUG] handleSelectCards broadcasting player:', {
+        playerId: player.id,
+        readyToPlay: player.readyToPlay,
+        selectedCardIds: player.selectedCardIds,
+      });
       this.broadcast({ type: 'playerUpdated', player });
     }
   }
