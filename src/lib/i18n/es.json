@@ -74,6 +74,8 @@
     "kickPlayer": "Expulsar",
     "copyLink": "Copiar Enlace",
     "linkCopied": "¡Enlace copiado!",
+    "share": "Compartir",
+    "shareText": "¡Únete a mi juego de Bingo!",
     "sessionSettings": "Configuración de Sesión",
     "allowHighlight": "Permitir Resaltar Números Cantados"
   },

@@ -23,6 +23,7 @@
   let showNumberBoard = $state(false);
   let showWinners = $state(false);
   let linkCopied = $state(false);
+  let canShare = $state(false);
   let activeTab = $state<'play' | 'host'>('play');
   let showLeaveConfirm = $state(false);
   let pendingNavigation = $state<(() => void) | null>(null);
@@ -34,6 +35,9 @@
   // Connect to room on mount
   onMount(() => {
     if (!browser) return;
+
+    // Check if Web Share API is supported
+    canShare = typeof navigator.share === 'function';
 
     if (!playerName || !roomId) {
       goto('/');
@@ -98,6 +102,21 @@
       setTimeout(() => {
         linkCopied = false;
       }, 2000);
+    }
+  }
+
+  async function shareRoom() {
+    if (!browser || !canShare) return;
+
+    const url = `${window.location.origin}/game/${roomId}`;
+    try {
+      await navigator.share({
+        title: $_('app.name'),
+        text: $_('host.shareText'),
+        url
+      });
+    } catch {
+      // User cancelled or share failed - silently ignore
     }
   }
 
@@ -229,13 +248,24 @@
           </div>
         {/if}
       </div>
-      <button
-        type="button"
-        class="btn btn-secondary text-sm"
-        onclick={copyRoomLink}
-      >
-        {linkCopied ? $_('host.linkCopied') : $_('host.copyLink')}
-      </button>
+      <div class="flex gap-2">
+        <button
+          type="button"
+          class="btn btn-secondary text-sm"
+          onclick={copyRoomLink}
+        >
+          {linkCopied ? $_('host.linkCopied') : $_('host.copyLink')}
+        </button>
+        {#if canShare}
+          <button
+            type="button"
+            class="btn btn-secondary text-sm"
+            onclick={shareRoom}
+          >
+            {$_('host.share')}
+          </button>
+        {/if}
+      </div>
     </div>
 
     <!-- Phase indicator -->
