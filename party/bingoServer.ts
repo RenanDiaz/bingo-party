@@ -610,16 +610,21 @@ export default class BingoServer implements Party.Server {
 
     if (!this.state) return;
 
-    this.state = updateSettings(this.state, { allowHighlightCalledNumbers: enabled });
+    try {
+      this.state = updateSettings(this.state, { allowHighlightCalledNumbers: enabled });
 
-    // If disabling, turn off highlighting for all players
-    if (!enabled) {
-      for (const playerId of Object.keys(this.state.players)) {
-        this.state = toggleHighlightCalledNumbers(this.state, playerId, false);
+      // If disabling, turn off highlighting for all players
+      if (!enabled && this.state.players) {
+        for (const playerId of Object.keys(this.state.players)) {
+          this.state = toggleHighlightCalledNumbers(this.state, playerId, false);
+        }
       }
-    }
 
-    this.broadcast({ type: 'gameState', state: this.state });
+      this.broadcast({ type: 'gameState', state: this.state });
+    } catch (error) {
+      console.error('Error toggling allow highlight:', error);
+      this.sendTo(senderId, { type: 'error', message: 'Failed to update setting' });
+    }
   }
 
   // Host: Create timeout

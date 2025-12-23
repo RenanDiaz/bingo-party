@@ -43,6 +43,7 @@
   let showPatternSelector = $state(false);
 
   const speedSeconds = $derived(Math.round(settings.callInterval / 1000));
+  const allowHighlight = $derived(settings.allowHighlightCalledNumbers ?? true);
 
   function handleSpeedChange(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -186,13 +187,13 @@
         <span class="text-white/80 text-sm">{$_('host.allowHighlight')}</span>
         <button
           type="button"
-          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {settings.allowHighlightCalledNumbers ? 'bg-primary-500' : 'bg-white/20'}"
-          onclick={() => onToggleAllowHighlight(!settings.allowHighlightCalledNumbers)}
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {allowHighlight ? 'bg-primary-500' : 'bg-white/20'}"
+          onclick={() => onToggleAllowHighlight(!allowHighlight)}
           aria-label={$_('host.allowHighlight')}
-          aria-pressed={settings.allowHighlightCalledNumbers}
+          aria-pressed={allowHighlight}
         >
           <span
-            class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {settings.allowHighlightCalledNumbers ? 'translate-x-6' : 'translate-x-1'}"
+            class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {allowHighlight ? 'translate-x-6' : 'translate-x-1'}"
           ></span>
         </button>
       </div>

@@ -303,8 +303,9 @@ export function toggleHighlightCalledNumbers(
   const player = state.players[playerId];
   if (!player) return state;
 
-  // Only allow if the host setting permits it
-  if (enabled && !state.settings.allowHighlightCalledNumbers) {
+  // Only allow if the host setting permits it (default to true for backwards compatibility)
+  const allowHighlight = state.settings.allowHighlightCalledNumbers ?? true;
+  if (enabled && !allowHighlight) {
     return state;
   }
 
