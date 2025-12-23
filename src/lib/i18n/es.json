@@ -41,7 +41,9 @@
     "backToHome": "Volver al Inicio",
     "tabPlay": "Jugar",
     "tabHost": "Anfitrión",
-    "highlightCalledNumbers": "Resaltar Números Cantados"
+    "highlightCalledNumbers": "Resaltar Números Cantados",
+    "reconnecting": "Reconectando...",
+    "reconnectingHint": "Por favor espera mientras restauramos tu conexión"
   },
   "bingo": {
     "bingo": "¡BINGO!",

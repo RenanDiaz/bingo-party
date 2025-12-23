@@ -186,14 +186,23 @@
   <title>{$_('app.name')} - Room {roomId}</title>
 </svelte:head>
 
-{#if store.error}
-  <!-- Error state -->
+{#if store.error && !store.isReconnecting}
+  <!-- Error state (only show when not reconnecting) -->
   <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
     <div class="card p-6 max-w-md text-center">
       <p class="text-red-400 mb-4">{store.error}</p>
       <button type="button" class="btn btn-primary" onclick={() => goto('/')}>
         {$_('game.backToHome')}
       </button>
+    </div>
+  </div>
+{:else if store.isReconnecting}
+  <!-- Reconnecting state -->
+  <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-2 border-yellow-400 border-t-transparent mx-auto mb-4"></div>
+      <p class="text-yellow-400 font-medium">{$_('game.reconnecting')}</p>
+      <p class="text-white/50 text-sm mt-2">{$_('game.reconnectingHint')}</p>
     </div>
   </div>
 {:else if !store.connected || !store.gameState || (store.cardPool.length === 0 && !store.myPlayer)}

@@ -41,7 +41,9 @@
     "backToHome": "Back to Home",
     "tabPlay": "Play",
     "tabHost": "Host",
-    "highlightCalledNumbers": "Highlight Called Numbers"
+    "highlightCalledNumbers": "Highlight Called Numbers",
+    "reconnecting": "Reconnecting...",
+    "reconnectingHint": "Please wait while we restore your connection"
   },
   "bingo": {
     "bingo": "BINGO!",
