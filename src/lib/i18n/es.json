@@ -128,5 +128,12 @@
     "roomNotFound": "Sala no encontrada",
     "nameTooShort": "El nombre debe tener al menos 2 caracteres",
     "navigationFailed": "Error al navegar. Por favor intenta de nuevo."
+  },
+  "navigation": {
+    "leaveTitle": "¿Salir del Juego?",
+    "leaveGameMessage": "Hay un juego en progreso. Si sales, no podrás volver a unirte con tus cartones actuales.",
+    "leaveHostMessage": "Eres el anfitrión. Si sales, no hay forma de recuperar la sesión de anfitrión y el juego quedará inactivo.",
+    "stay": "Quedarse",
+    "leave": "Salir"
   }
 }
