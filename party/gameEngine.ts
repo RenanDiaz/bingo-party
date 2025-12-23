@@ -132,7 +132,7 @@ export function selectCards(
         ...player,
         selectedCardIds: validCardIds,
         markedCells,
-        readyToPlay: validCardIds.length > 0,
+        // Don't set readyToPlay here - only set it when player confirms via playerReady
       },
     },
   };
