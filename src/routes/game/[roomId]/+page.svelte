@@ -160,11 +160,6 @@
   const isLobbyOrSelection = $derived(phase === 'lobby' || phase === 'cardSelection');
   const isReadyToPlay = $derived(store.myPlayer?.readyToPlay ?? false);
 
-  // DEBUG: Log when isReadyToPlay changes
-  $effect(() => {
-    console.log('[DEBUG] isReadyToPlay changed:', isReadyToPlay, 'myPlayer:', store.myPlayer);
-  });
-
   // Create derived states for card selection to ensure proper reactivity
   // The getter pattern in the store doesn't always trigger component re-renders
   const cardPool = $derived(store.cardPool);
