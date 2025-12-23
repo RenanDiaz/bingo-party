@@ -74,6 +74,8 @@
     "kickPlayer": "Kick",
     "copyLink": "Copy Room Link",
     "linkCopied": "Link copied!",
+    "share": "Share",
+    "shareText": "Join my Bingo game!",
     "sessionSettings": "Session Settings",
     "allowHighlight": "Allow Highlight Called Numbers"
   },
