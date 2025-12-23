@@ -11,6 +11,7 @@ import type {
 } from '../../../shared/types';
 import { checkPatternMatch, getWinningCells } from '../utils/patternDetector';
 import { createEmptyMarkedGrid } from '../utils/cardGenerator';
+import { playNumberCalledSound, playBingoSound } from '../utils/audio';
 
 // Create a reactive game store
 export function createGameStore() {
@@ -215,6 +216,8 @@ export function createGameStore() {
         if (myPlayer?.autoMark) {
           autoMarkLocalNumber(message.call.number);
         }
+        // Play sound for number call
+        playNumberCalledSound();
         break;
 
       case 'playerJoined':
@@ -258,6 +261,8 @@ export function createGameStore() {
             ...gameState,
             winners: [...gameState.winners, message.winner],
           };
+          // Play celebratory sound for bingo
+          playBingoSound();
         }
         break;
 
@@ -354,8 +359,8 @@ export function createGameStore() {
     send({ type: 'selectCards', cardIds });
   }
 
-  function regenerateCards() {
-    send({ type: 'regenerateCards' });
+  function regenerateCards(preserveSelected: boolean = false) {
+    send({ type: 'regenerateCards', preserveSelected });
   }
 
   function markCell(cardId: string, row: number, col: number) {
@@ -379,6 +384,10 @@ export function createGameStore() {
 
   function toggleAutoMark(enabled: boolean) {
     send({ type: 'toggleAutoMark', enabled });
+  }
+
+  function toggleHighlightCalledNumbers(enabled: boolean) {
+    send({ type: 'toggleHighlightCalledNumbers', enabled });
   }
 
   function setReady() {
@@ -416,6 +425,10 @@ export function createGameStore() {
 
   function toggleAutoCall(enabled: boolean) {
     send({ type: 'hostToggleAutoCall', enabled });
+  }
+
+  function toggleAllowHighlight(enabled: boolean) {
+    send({ type: 'hostToggleAllowHighlight', enabled });
   }
 
   function createTimeout(durationSeconds: number) {
@@ -461,6 +474,7 @@ export function createGameStore() {
     markCell,
     claimBingo,
     toggleAutoMark,
+    toggleHighlightCalledNumbers,
     setReady,
 
     // Host actions
@@ -472,6 +486,7 @@ export function createGameStore() {
     setPattern,
     setSpeed,
     toggleAutoCall,
+    toggleAllowHighlight,
     createTimeout,
     endTimeout,
     kickPlayer,

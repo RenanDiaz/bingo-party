@@ -40,7 +40,8 @@
     "room": "Sala",
     "backToHome": "Volver al Inicio",
     "tabPlay": "Jugar",
-    "tabHost": "Anfitrión"
+    "tabHost": "Anfitrión",
+    "highlightCalledNumbers": "Resaltar Números Cantados"
   },
   "bingo": {
     "bingo": "¡BINGO!",
@@ -70,7 +71,9 @@
     "endTimeout": "Terminar Pausa",
     "kickPlayer": "Expulsar",
     "copyLink": "Copiar Enlace",
-    "linkCopied": "¡Enlace copiado!"
+    "linkCopied": "¡Enlace copiado!",
+    "sessionSettings": "Configuración de Sesión",
+    "allowHighlight": "Permitir Resaltar Números Cantados"
   },
   "pattern": {
     "selectPattern": "Seleccionar Patrón",
@@ -111,7 +114,10 @@
     "subtitle": "Selecciona 1-4 cartones para jugar",
     "selected": "Seleccionado",
     "confirm": "Confirmar Selección",
-    "regenerate": "Obtener Nuevos Cartones"
+    "regenerate": "Obtener Nuevos Cartones",
+    "regenerateOthers": "Nuevas Opciones",
+    "regenerateOthersTooltip": "Mantén tus cartones seleccionados, obtén nuevas opciones para el resto",
+    "regenerateAll": "Reemplazar Todos"
   },
   "errors": {
     "connectionFailed": "Error de conexión",

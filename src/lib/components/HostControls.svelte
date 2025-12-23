@@ -15,6 +15,7 @@
     onReset: () => void;
     onCallNext: () => void;
     onToggleAutoCall: (enabled: boolean) => void;
+    onToggleAllowHighlight: (enabled: boolean) => void;
     onSetSpeed: (intervalMs: number) => void;
     onSetPattern: (pattern: Pattern) => void;
     onCreateTimeout: (seconds: number) => void;
@@ -32,6 +33,7 @@
     onReset,
     onCallNext,
     onToggleAutoCall,
+    onToggleAllowHighlight,
     onSetSpeed,
     onSetPattern,
     onCreateTimeout,
@@ -171,6 +173,29 @@
           }}
         />
       {/if}
+    </div>
+  {/if}
+
+  <!-- Session settings -->
+  {#if phase === 'lobby'}
+    <div class="space-y-3 border-t border-white/10 pt-4">
+      <h3 class="text-sm font-medium text-white/70">{$_('host.sessionSettings')}</h3>
+
+      <!-- Allow highlight called numbers -->
+      <div class="flex items-center justify-between">
+        <span class="text-white/80 text-sm">{$_('host.allowHighlight')}</span>
+        <button
+          type="button"
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {settings.allowHighlightCalledNumbers ? 'bg-primary-500' : 'bg-white/20'}"
+          onclick={() => onToggleAllowHighlight(!settings.allowHighlightCalledNumbers)}
+          aria-label={$_('host.allowHighlight')}
+          aria-pressed={settings.allowHighlightCalledNumbers}
+        >
+          <span
+            class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {settings.allowHighlightCalledNumbers ? 'translate-x-6' : 'translate-x-1'}"
+          ></span>
+        </button>
+      </div>
     </div>
   {/if}
 </div>

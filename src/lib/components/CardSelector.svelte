@@ -8,7 +8,7 @@
     cards: BingoCard[];
     selectedIds: string[];
     onSelect: (cardIds: string[]) => void;
-    onRegenerate: () => void;
+    onRegenerate: (preserveSelected: boolean) => void;
     onConfirm: () => void;
     disabled?: boolean;
   }
@@ -31,6 +31,7 @@
   }
 
   const canConfirm = $derived(selectedIds.length >= MIN_CARDS);
+  const hasSelection = $derived(selectedIds.length > 0);
 </script>
 
 <div class="space-y-4">
@@ -56,14 +57,35 @@
 
   <!-- Actions -->
   <div class="flex flex-col sm:flex-row gap-2 justify-center">
-    <button
-      type="button"
-      class="btn btn-secondary"
-      onclick={onRegenerate}
-      disabled={disabled}
-    >
-      {$_('cardSelector.regenerate')}
-    </button>
+    {#if hasSelection}
+      <!-- When cards are selected, offer to regenerate unselected only -->
+      <button
+        type="button"
+        class="btn btn-secondary"
+        onclick={() => onRegenerate(true)}
+        disabled={disabled}
+        title={$_('cardSelector.regenerateOthersTooltip')}
+      >
+        {$_('cardSelector.regenerateOthers')}
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary text-sm opacity-75"
+        onclick={() => onRegenerate(false)}
+        disabled={disabled}
+      >
+        {$_('cardSelector.regenerateAll')}
+      </button>
+    {:else}
+      <button
+        type="button"
+        class="btn btn-secondary"
+        onclick={() => onRegenerate(false)}
+        disabled={disabled}
+      >
+        {$_('cardSelector.regenerate')}
+      </button>
+    {/if}
     <button
       type="button"
       class="btn btn-primary"

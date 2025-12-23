@@ -16,6 +16,7 @@ import {
   regenerateCards,
   markCell,
   toggleAutoMark,
+  toggleHighlightCalledNumbers,
   callNextNumber,
   validateBingoClaim,
   addWinner,
@@ -184,7 +185,7 @@ export default class BingoServer implements Party.Server {
         break;
 
       case 'regenerateCards':
-        this.handleRegenerateCards(sender.id);
+        this.handleRegenerateCards(sender.id, data.preserveSelected ?? false);
         break;
 
       case 'markCell':
@@ -197,6 +198,10 @@ export default class BingoServer implements Party.Server {
 
       case 'toggleAutoMark':
         this.handleToggleAutoMark(sender.id, data.enabled);
+        break;
+
+      case 'toggleHighlightCalledNumbers':
+        this.handleToggleHighlightCalledNumbers(sender.id, data.enabled);
         break;
 
       case 'playerReady':
@@ -233,6 +238,10 @@ export default class BingoServer implements Party.Server {
 
       case 'hostToggleAutoCall':
         this.handleHostToggleAutoCall(sender.id, data.enabled);
+        break;
+
+      case 'hostToggleAllowHighlight':
+        this.handleHostToggleAllowHighlight(sender.id, data.enabled);
         break;
 
       case 'hostCreateTimeout':
@@ -300,7 +309,7 @@ export default class BingoServer implements Party.Server {
   }
 
   // Handle regenerate cards
-  private handleRegenerateCards(senderId: string) {
+  private handleRegenerateCards(senderId: string, preserveSelected: boolean) {
     if (!this.state) return;
 
     // Only allow in lobby or timeout
@@ -309,7 +318,7 @@ export default class BingoServer implements Party.Server {
       return;
     }
 
-    this.state = regenerateCards(this.state, senderId);
+    this.state = regenerateCards(this.state, senderId, preserveSelected);
 
     const player = this.state.players[senderId];
     if (player) {
@@ -359,9 +368,13 @@ export default class BingoServer implements Party.Server {
     const winner = this.state.winners[this.state.winners.length - 1];
     this.broadcast({ type: 'bingoValidated', winner });
 
-    // If game ended, stop timers
-    if (this.state.phase === 'finished') {
-      this.stopAutoCall();
+    // Always stop auto-call when a winner is detected to give other players a chance
+    // The host can manually resume or call numbers if multiple winners are allowed
+    this.stopAutoCall();
+
+    // Update settings to reflect that auto-call is now off
+    if (this.state.settings.autoCall) {
+      this.state = updateSettings(this.state, { autoCall: false });
     }
 
     this.broadcast({ type: 'gameState', state: this.state });
@@ -372,6 +385,24 @@ export default class BingoServer implements Party.Server {
     if (!this.state) return;
 
     this.state = toggleAutoMark(this.state, senderId, enabled);
+
+    const player = this.state.players[senderId];
+    if (player) {
+      this.broadcast({ type: 'playerUpdated', player });
+    }
+  }
+
+  // Handle toggle highlight called numbers
+  private handleToggleHighlightCalledNumbers(senderId: string, enabled: boolean) {
+    if (!this.state) return;
+
+    // Check if host allows this feature
+    if (enabled && !this.state.settings.allowHighlightCalledNumbers) {
+      this.sendTo(senderId, { type: 'error', message: 'Highlighting disabled by host' });
+      return;
+    }
+
+    this.state = toggleHighlightCalledNumbers(this.state, senderId, enabled);
 
     const player = this.state.players[senderId];
     if (player) {
@@ -409,6 +440,13 @@ export default class BingoServer implements Party.Server {
 
     if (!this.state || this.state.phase !== 'lobby') {
       this.sendTo(senderId, { type: 'error', message: 'Game already started' });
+      return;
+    }
+
+    // Check if the host has selected cards (they need to play too!)
+    const hostPlayer = this.state.players[senderId];
+    if (!hostPlayer || hostPlayer.selectedCardIds.length === 0) {
+      this.sendTo(senderId, { type: 'error', message: 'Please select your cards before starting' });
       return;
     }
 
@@ -561,6 +599,27 @@ export default class BingoServer implements Party.Server {
     } else {
       this.stopAutoCall();
     }
+  }
+
+  // Host: Toggle allow highlight called numbers
+  private handleHostToggleAllowHighlight(senderId: string, enabled: boolean) {
+    if (!this.isHost(senderId)) {
+      this.sendTo(senderId, { type: 'error', message: 'Not authorized' });
+      return;
+    }
+
+    if (!this.state) return;
+
+    this.state = updateSettings(this.state, { allowHighlightCalledNumbers: enabled });
+
+    // If disabling, turn off highlighting for all players
+    if (!enabled) {
+      for (const playerId of Object.keys(this.state.players)) {
+        this.state = toggleHighlightCalledNumbers(this.state, playerId, false);
+      }
+    }
+
+    this.broadcast({ type: 'gameState', state: this.state });
   }
 
   // Host: Create timeout

@@ -51,6 +51,7 @@ export interface GameSettings {
   allowMultipleWinners: boolean;
   maxWinners: number;
   requireAllPlayersReady: boolean;
+  allowHighlightCalledNumbers: boolean; // Host-controlled: allow players to see called numbers highlighted on their cards
 }
 
 // Player state
@@ -64,6 +65,7 @@ export interface BingoPlayer {
   markedCells: Record<string, boolean[][]>; // cardId -> marked grid
   autoMark: boolean;
   readyToPlay: boolean;
+  highlightCalledNumbers: boolean; // Player preference: show called numbers highlighted on cards
 }
 
 // Full game state
@@ -95,10 +97,11 @@ export interface BingoGameState {
 export type ClientMessage =
   | { type: 'joinRoom'; playerName: string }
   | { type: 'selectCards'; cardIds: string[] }
-  | { type: 'regenerateCards' }
+  | { type: 'regenerateCards'; preserveSelected?: boolean }
   | { type: 'markCell'; cardId: string; row: number; col: number }
   | { type: 'claimBingo'; cardId: string; markedGrid: boolean[][] }
   | { type: 'toggleAutoMark'; enabled: boolean }
+  | { type: 'toggleHighlightCalledNumbers'; enabled: boolean }
   | { type: 'playerReady' }
   | { type: 'hostStartGame' }
   | { type: 'hostCallNext' }
@@ -108,6 +111,7 @@ export type ClientMessage =
   | { type: 'hostSetPattern'; pattern: Pattern }
   | { type: 'hostSetSpeed'; intervalMs: number }
   | { type: 'hostToggleAutoCall'; enabled: boolean }
+  | { type: 'hostToggleAllowHighlight'; enabled: boolean }
   | { type: 'hostCreateTimeout'; durationSeconds: number }
   | { type: 'hostEndTimeout' }
   | { type: 'hostKickPlayer'; playerId: string };
