@@ -12,6 +12,8 @@ import {
   addPlayer,
   removePlayer,
   updatePlayerConnection,
+  findPlayerByPersistentId,
+  reconnectPlayer,
   selectCards,
   regenerateCards,
   markCell,
@@ -155,11 +157,15 @@ export default class BingoServer implements Party.Server {
     this.connections.delete(conn.id);
 
     if (this.state && this.state.players[conn.id]) {
+      // Mark player as disconnected but keep them in state for potential reconnection
       this.state = updatePlayerConnection(this.state, conn.id, false);
-      this.broadcast({
-        type: 'playerLeft',
-        playerId: conn.id,
-      });
+
+      const player = this.state.players[conn.id];
+      if (player) {
+        // Broadcast player updated (disconnected) instead of playerLeft
+        // This allows them to reconnect without being fully removed
+        this.broadcast({ type: 'playerUpdated', player });
+      }
     }
   }
 
@@ -177,7 +183,7 @@ export default class BingoServer implements Party.Server {
 
     switch (data.type) {
       case 'joinRoom':
-        this.handleJoinRoom(sender.id, data.playerName);
+        this.handleJoinRoom(sender.id, data.playerName, data.persistentId);
         break;
 
       case 'selectCards':
@@ -271,18 +277,48 @@ export default class BingoServer implements Party.Server {
   }
 
   // Handle join room
-  private handleJoinRoom(senderId: string, playerName: string) {
+  private handleJoinRoom(senderId: string, playerName: string, persistentId?: string) {
     if (!this.state) return;
 
-    // Check if player already exists (reconnect)
+    // Check if player already exists by connection ID (same connection reconnect)
     if (this.state.players[senderId]) {
       this.state = updatePlayerConnection(this.state, senderId, true);
       this.broadcast({ type: 'gameState', state: this.state });
       return;
     }
 
+    // Check if player exists by persistent ID (reconnect with new connection)
+    if (persistentId) {
+      const existingPlayer = findPlayerByPersistentId(this.state, persistentId);
+      if (existingPlayer) {
+        const oldPlayerId = existingPlayer.id;
+
+        // Reconnect the player with the new connection ID
+        this.state = reconnectPlayer(this.state, oldPlayerId, senderId);
+
+        const reconnectedPlayer = this.state.players[senderId];
+        if (reconnectedPlayer) {
+          // Send card pool to reconnected player
+          this.sendTo(senderId, { type: 'cardPool', cards: reconnectedPlayer.cards });
+
+          // Notify everyone about the player reconnection
+          this.broadcast({ type: 'playerUpdated', player: reconnectedPlayer });
+
+          // Send full state to the reconnected player
+          this.sendTo(senderId, {
+            type: 'init',
+            playerId: senderId,
+            isHost: this.state.hostId === senderId,
+            state: this.state,
+          });
+        }
+        return;
+      }
+    }
+
+    // New player - create fresh entry
     const isHost = !this.state.hostId || this.state.hostId === senderId;
-    const player = createPlayer(senderId, playerName, isHost);
+    const player = createPlayer(senderId, playerName, isHost, persistentId);
 
     if (isHost) {
       this.state = { ...this.state, hostId: senderId };

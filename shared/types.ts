@@ -57,6 +57,7 @@ export interface GameSettings {
 // Player state
 export interface BingoPlayer {
   id: string;
+  persistentId?: string; // Used to identify player across reconnections
   name: string;
   isHost: boolean;
   connected: boolean;
@@ -95,7 +96,7 @@ export interface BingoGameState {
 
 // Client-side messages
 export type ClientMessage =
-  | { type: 'joinRoom'; playerName: string }
+  | { type: 'joinRoom'; playerName: string; persistentId?: string }
   | { type: 'selectCards'; cardIds: string[] }
   | { type: 'regenerateCards'; preserveSelected?: boolean }
   | { type: 'markCell'; cardId: string; row: number; col: number }

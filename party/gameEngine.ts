@@ -36,11 +36,13 @@ export function createInitialState(roomId: string, hostId: string): BingoGameSta
 export function createPlayer(
   id: string,
   name: string,
-  isHost: boolean
+  isHost: boolean,
+  persistentId?: string
 ): BingoPlayer {
   return {
     id,
     name,
+    persistentId,
     isHost,
     connected: true,
     cards: generateCardPool(CARD_POOL_SIZE),
@@ -97,6 +99,56 @@ export function updatePlayerConnection(
       },
     },
   };
+}
+
+// Find a player by their persistent ID
+export function findPlayerByPersistentId(
+  state: BingoGameState,
+  persistentId: string
+): BingoPlayer | null {
+  for (const player of Object.values(state.players)) {
+    if (player.persistentId === persistentId) {
+      return player;
+    }
+  }
+  return null;
+}
+
+// Reconnect a player with a new connection ID, preserving all their state
+export function reconnectPlayer(
+  state: BingoGameState,
+  oldPlayerId: string,
+  newConnectionId: string
+): BingoGameState {
+  const player = state.players[oldPlayerId];
+  if (!player) return state;
+
+  // Remove old player entry and add with new connection ID
+  const { [oldPlayerId]: removedPlayer, ...remainingPlayers } = state.players;
+
+  const updatedPlayer: BingoPlayer = {
+    ...player,
+    id: newConnectionId,
+    connected: true,
+  };
+
+  let newState: BingoGameState = {
+    ...state,
+    players: {
+      ...remainingPlayers,
+      [newConnectionId]: updatedPlayer,
+    },
+  };
+
+  // Update hostId if the reconnecting player was the host
+  if (state.hostId === oldPlayerId) {
+    newState = {
+      ...newState,
+      hostId: newConnectionId,
+    };
+  }
+
+  return newState;
 }
 
 // Select cards for a player
