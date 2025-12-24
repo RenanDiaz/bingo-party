@@ -461,17 +461,33 @@ export function resumeGame(state: BingoGameState): BingoGameState {
 }
 
 // Reset the game
-export function resetGame(state: BingoGameState): BingoGameState {
-  // Regenerate cards for all players
+export function resetGame(state: BingoGameState, preserveCardSelections: boolean = true): BingoGameState {
   const updatedPlayers: Record<string, BingoPlayer> = {};
+
   for (const [playerId, player] of Object.entries(state.players)) {
-    updatedPlayers[playerId] = {
-      ...player,
-      cards: generateCardPool(CARD_POOL_SIZE),
-      selectedCardIds: [],
-      markedCells: {},
-      readyToPlay: false,
-    };
+    if (preserveCardSelections && player.selectedCardIds.length > 0) {
+      // Preserve card pool and selections, only reset marked cells
+      const freshMarkedCells: Record<string, boolean[][]> = {};
+      for (const cardId of player.selectedCardIds) {
+        freshMarkedCells[cardId] = createEmptyMarkedGrid();
+      }
+
+      updatedPlayers[playerId] = {
+        ...player,
+        markedCells: freshMarkedCells,
+        // Keep readyToPlay true since they already selected cards
+        readyToPlay: true,
+      };
+    } else {
+      // Full reset - regenerate cards and clear everything
+      updatedPlayers[playerId] = {
+        ...player,
+        cards: generateCardPool(CARD_POOL_SIZE),
+        selectedCardIds: [],
+        markedCells: {},
+        readyToPlay: false,
+      };
+    }
   }
 
   return {

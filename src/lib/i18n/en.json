@@ -29,6 +29,7 @@
     "timeout": "Timeout - Change Cards",
     "selectCards": "Select Your Cards",
     "regenerateCards": "Regenerate Cards",
+    "changeCards": "Change Cards",
     "playingWith": "Playing with {count} card(s)",
     "ready": "Ready!",
     "notReady": "Select cards to play",

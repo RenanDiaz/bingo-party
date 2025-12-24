@@ -103,6 +103,7 @@ export type ClientMessage =
   | { type: 'toggleAutoMark'; enabled: boolean }
   | { type: 'toggleHighlightCalledNumbers'; enabled: boolean }
   | { type: 'playerReady' }
+  | { type: 'playerUnready' }
   | { type: 'hostStartGame' }
   | { type: 'hostCallNext' }
   | { type: 'hostPause' }
