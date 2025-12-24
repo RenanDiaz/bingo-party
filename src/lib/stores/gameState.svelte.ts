@@ -13,6 +13,40 @@ import { checkPatternMatch, getWinningCells } from '../utils/patternDetector';
 import { createEmptyMarkedGrid } from '../utils/cardGenerator';
 import { playNumberCalledSound, playBingoSound } from '../utils/audio';
 
+// Generate a persistent player ID for reconnection
+function generatePersistentId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// Get or create persistent player ID for a room
+function getPersistentPlayerId(roomId: string): string {
+  if (!browser) return '';
+
+  const storageKey = `bingo-player-id-${roomId}`;
+  let persistentId = localStorage.getItem(storageKey);
+
+  if (!persistentId) {
+    persistentId = generatePersistentId();
+    localStorage.setItem(storageKey, persistentId);
+  }
+
+  return persistentId;
+}
+
+// Clear persistent player ID for a room (used when kicked)
+function clearPersistentPlayerId(roomId: string): void {
+  if (!browser) return;
+  localStorage.removeItem(`bingo-player-id-${roomId}`);
+}
+
 // Create a reactive game store
 export function createGameStore() {
   // Core state
@@ -33,6 +67,7 @@ export function createGameStore() {
   let connectionTimeout: ReturnType<typeof setTimeout> | null = null;
   let currentRoomId: string | null = null;
   let currentPlayerName: string | null = null;
+  let persistentPlayerId: string | null = null;
   let isReconnecting = $state<boolean>(false);
   let retryCount = 0;
   let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -103,6 +138,7 @@ export function createGameStore() {
     // Store room ID for reconnection
     if (!isRetry) {
       currentRoomId = roomId;
+      persistentPlayerId = getPersistentPlayerId(roomId);
       intentionalDisconnect = false;
       retryCount = 0;
     }
@@ -160,7 +196,7 @@ export function createGameStore() {
 
       // Auto-rejoin room after reconnection
       if (wasReconnecting && currentPlayerName) {
-        send({ type: 'joinRoom', playerName: currentPlayerName });
+        send({ type: 'joinRoom', playerName: currentPlayerName, persistentId: persistentPlayerId || undefined });
       }
     };
 
@@ -255,6 +291,7 @@ export function createGameStore() {
     isReconnecting = false;
     currentRoomId = null;
     currentPlayerName = null;
+    persistentPlayerId = null;
     retryCount = 0;
     gameState = null;
     myPlayerId = '';
@@ -402,6 +439,10 @@ export function createGameStore() {
 
       case 'kicked':
         kicked = true;
+        // Clear persistent ID so they can't rejoin with the same identity
+        if (currentRoomId) {
+          clearPersistentPlayerId(currentRoomId);
+        }
         disconnect();
         break;
 
@@ -435,7 +476,7 @@ export function createGameStore() {
   // Player actions
   function joinRoom(playerName: string) {
     currentPlayerName = playerName;
-    send({ type: 'joinRoom', playerName });
+    send({ type: 'joinRoom', playerName, persistentId: persistentPlayerId || undefined });
   }
 
   function selectCards(cardIds: string[]) {
