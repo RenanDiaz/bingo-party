@@ -28,9 +28,15 @@
   let showLeaveConfirm = $state(false);
   let pendingNavigation = $state<(() => void) | null>(null);
 
+  // Name prompt state for players joining via shared link
+  let showNamePrompt = $state(false);
+  let joinName = $state('');
+  let joinNameError = $state('');
+
   // Get room ID and player name from URL
   const roomId = $derived($page.params.roomId ?? '');
-  const playerName = $derived($page.url.searchParams.get('name') || '');
+  const playerNameFromUrl = $derived($page.url.searchParams.get('name') || '');
+  let playerName = $state('');
 
   // Connect to room on mount
   onMount(() => {
@@ -39,10 +45,19 @@
     // Check if Web Share API is supported
     canShare = typeof navigator.share === 'function';
 
-    if (!playerName || !roomId) {
+    if (!roomId) {
       goto('/');
       return;
     }
+
+    // If no name in URL, show prompt for joining via shared link
+    if (!playerNameFromUrl) {
+      showNamePrompt = true;
+      return;
+    }
+
+    // Set player name from URL
+    playerName = playerNameFromUrl;
 
     store.connect(roomId);
 
@@ -218,13 +233,77 @@
     showLeaveConfirm = false;
     pendingNavigation = null;
   }
+
+  function handleJoinWithName() {
+    const trimmedName = joinName.trim();
+    if (trimmedName.length < 2) {
+      joinNameError = $_('errors.nameTooShort');
+      return;
+    }
+
+    joinNameError = '';
+    showNamePrompt = false;
+    playerName = trimmedName;
+
+    // Update URL with name parameter (for refresh support)
+    const url = new URL(window.location.href);
+    url.searchParams.set('name', trimmedName);
+    window.history.replaceState({}, '', url.toString());
+
+    store.connect(roomId);
+
+    // Wait for connection and join
+    const checkConnection = setInterval(() => {
+      if (store.connected) {
+        store.joinRoom(trimmedName);
+        clearInterval(checkConnection);
+      } else if (store.error) {
+        clearInterval(checkConnection);
+      }
+    }, 100);
+  }
 </script>
 
 <svelte:head>
   <title>{$_('app.name')} - Room {roomId}</title>
 </svelte:head>
 
-{#if store.error && !store.isReconnecting}
+{#if showNamePrompt}
+  <!-- Name prompt for players joining via shared link -->
+  <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+    <div class="card p-6 max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold text-white text-center mb-2">{$_('landing.joinGame')}</h2>
+      <p class="text-white/70 text-center mb-6">{$_('game.room')}: <span class="font-bold text-white">{roomId}</span></p>
+
+      <form onsubmit={(e) => { e.preventDefault(); handleJoinWithName(); }}>
+        <div class="mb-4">
+          <label for="joinName" class="block text-white/70 text-sm mb-2">{$_('landing.enterName')}</label>
+          <input
+            id="joinName"
+            type="text"
+            class="input w-full"
+            placeholder={$_('landing.namePlaceholder')}
+            bind:value={joinName}
+            maxlength={20}
+          />
+          {#if joinNameError}
+            <p class="text-red-400 text-sm mt-1">{joinNameError}</p>
+          {/if}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full" disabled={!joinName.trim()}>
+          {$_('landing.play')}
+        </button>
+      </form>
+
+      <div class="mt-4 text-center">
+        <button type="button" class="text-white/50 hover:text-white/70 text-sm" onclick={() => goto('/')}>
+          {$_('landing.back')}
+        </button>
+      </div>
+    </div>
+  </div>
+{:else if store.error && !store.isReconnecting}
   <!-- Error state (only show when not reconnecting) -->
   <div class="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
     <div class="card p-6 max-w-md text-center">
