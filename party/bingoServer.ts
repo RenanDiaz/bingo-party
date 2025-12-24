@@ -208,6 +208,10 @@ export default class BingoServer implements Party.Server {
         this.handlePlayerReady(sender.id);
         break;
 
+      case 'playerUnready':
+        this.handlePlayerUnready(sender.id);
+        break;
+
       case 'hostStartGame':
         this.handleHostStartGame(sender.id);
         break;
@@ -431,6 +435,33 @@ export default class BingoServer implements Party.Server {
     }
   }
 
+  // Handle player unready (go back to card selection)
+  private handlePlayerUnready(senderId: string) {
+    if (!this.state) return;
+
+    // Only allow in lobby phase
+    if (this.state.phase !== 'lobby') {
+      this.sendTo(senderId, { type: 'error', message: 'Cannot change cards now' });
+      return;
+    }
+
+    const player = this.state.players[senderId];
+    if (player) {
+      this.state = {
+        ...this.state,
+        players: {
+          ...this.state.players,
+          [senderId]: {
+            ...player,
+            readyToPlay: false,
+          },
+        },
+      };
+
+      this.broadcast({ type: 'playerUpdated', player: this.state.players[senderId] });
+    }
+  }
+
   // Host: Start game
   private handleHostStartGame(senderId: string) {
     if (!this.isHost(senderId)) {
@@ -538,11 +569,20 @@ export default class BingoServer implements Party.Server {
     this.stopAutoCall();
     this.stopTimeoutTimer();
 
-    this.state = resetGame(this.state);
+    // Store player IDs that had selections before reset
+    const playersWithSelections = new Set(
+      Object.entries(this.state.players)
+        .filter(([_, player]) => player.selectedCardIds.length > 0)
+        .map(([playerId]) => playerId)
+    );
 
-    // Send new card pools to all players
+    this.state = resetGame(this.state, true);
+
+    // Only send new card pools to players who didn't have selections
     for (const [playerId, player] of Object.entries(this.state.players)) {
-      this.sendTo(playerId, { type: 'cardPool', cards: player.cards });
+      if (!playersWithSelections.has(playerId)) {
+        this.sendTo(playerId, { type: 'cardPool', cards: player.cards });
+      }
     }
 
     this.broadcast({ type: 'gameReset', state: this.state });

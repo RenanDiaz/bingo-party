@@ -373,8 +373,15 @@ export function createGameStore() {
 
       case 'gameReset':
         gameState = message.state;
-        selectedCardIds = [];
-        markedCells = {};
+        // Sync selections and marked cells from server state (which may preserve them)
+        if (gameState.players[myPlayerId]) {
+          const myPlayerState = gameState.players[myPlayerId];
+          selectedCardIds = [...myPlayerState.selectedCardIds];
+          markedCells = { ...myPlayerState.markedCells };
+        } else {
+          selectedCardIds = [];
+          markedCells = {};
+        }
         break;
 
       case 'timeoutStarted':
@@ -477,6 +484,10 @@ export function createGameStore() {
     send({ type: 'playerReady' });
   }
 
+  function setUnready() {
+    send({ type: 'playerUnready' });
+  }
+
   // Host actions
   function startGame() {
     send({ type: 'hostStartGame' });
@@ -560,6 +571,7 @@ export function createGameStore() {
     toggleAutoMark,
     toggleHighlightCalledNumbers,
     setReady,
+    setUnready,
 
     // Host actions
     startGame,

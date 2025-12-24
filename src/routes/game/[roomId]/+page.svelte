@@ -371,6 +371,19 @@
         {:else}
           <!-- Game view -->
           <div class="space-y-4">
+            <!-- Change cards button (only in lobby when ready) -->
+            {#if phase === 'lobby' && isReadyToPlay}
+              <div class="flex justify-center">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick={() => store.setUnready()}
+                >
+                  {$_('game.changeCards')}
+                </button>
+              </div>
+            {/if}
+
             <!-- Current number display -->
             {#if store.gameState?.currentNumber}
               <CalledNumberDisplay

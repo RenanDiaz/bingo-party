@@ -29,6 +29,7 @@
     "timeout": "Pausa - Cambiar Cartones",
     "selectCards": "Selecciona Tus Cartones",
     "regenerateCards": "Regenerar Cartones",
+    "changeCards": "Cambiar Cartones",
     "playingWith": "Jugando con {count} cartón(es)",
     "ready": "¡Listo!",
     "notReady": "Selecciona cartones para jugar",
