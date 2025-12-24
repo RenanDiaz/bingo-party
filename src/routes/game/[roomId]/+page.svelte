@@ -415,7 +415,7 @@
             {/if}
 
             <!-- Player's cards -->
-            <div class="grid grid-cols-1 {store.myCards.length > 1 ? 'md:grid-cols-2' : ''} gap-4">
+            <div class="grid grid-cols-1 {store.myCards.length > 1 ? 'sm:grid-cols-2' : ''} gap-4">
               {#each store.myCards as card (card.id)}
                 {@const cardMarkedCells = store.markedCells[card.id] || []}
                 {@const cardWinningCells = store.winningCells[card.id]}
