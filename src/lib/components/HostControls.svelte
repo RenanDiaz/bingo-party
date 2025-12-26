@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { locale } from '../i18n';
   import type { GamePhase, GameSettings, Pattern } from '../../../shared/types';
   import { MIN_CALL_INTERVAL, MAX_CALL_INTERVAL } from '../../../shared/constants';
   import PatternSelector from './PatternSelector.svelte';
@@ -162,7 +163,7 @@
         onclick={() => showPatternSelector = !showPatternSelector}
       >
         <span>{$_('pattern.selectPattern')}</span>
-        <span class="text-sm opacity-70">{currentPattern.name}</span>
+        <span class="text-sm opacity-70">{$locale?.startsWith('es') && currentPattern.nameEs ? currentPattern.nameEs : currentPattern.name}</span>
       </button>
 
       {#if showPatternSelector}

@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import type { Pattern } from '../../../shared/types';
   import { PRESET_PATTERNS } from '../../../shared/patterns';
+  import { locale } from '../i18n';
   import PatternPreview from './PatternPreview.svelte';
 
   interface Props {
@@ -24,11 +25,11 @@
           <PatternPreview {pattern} size="small" />
           <div class="flex-1 min-w-0">
             <p class="text-white text-sm font-medium truncate">
-              {pattern.name}
+              {$locale?.startsWith('es') && pattern.nameEs ? pattern.nameEs : pattern.name}
             </p>
             {#if pattern.description}
               <p class="text-white/50 text-xs truncate">
-                {pattern.description}
+                {$locale?.startsWith('es') && pattern.descriptionEs ? pattern.descriptionEs : pattern.description}
               </p>
             {/if}
           </div>
