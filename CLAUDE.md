@@ -356,3 +356,33 @@ npm run deploy:party
 - `svelte-i18n`: Internationalization (`$_()` function)
 - `partykit`: Real-time backend framework
 - Node.js 20+ required (see `.nvmrc`)
+
+## Planned Features
+
+### 1. Chat y Reacciones
+Sistema de comunicación entre jugadores:
+- **En espera (lobby)**: Chat completo con mensajes de texto
+- **Durante el juego**: Solo mensajes preestablecidos y reacciones rápidas
+- **UX**: Los mensajes recibidos deben mostrarse de manera visible sin necesidad de abrir el chat (badges, notificaciones flotantes, o indicadores)
+- **Ubicación**: Acceso fácil desde cualquier parte de la interfaz
+
+### 2. Mejora de Visibilidad del Número Actual
+El número llamado debe ser visible desde cualquier parte de la pantalla:
+- **Móvil**: Prioridad alta - el número debe verse sin importar el scroll
+- **Opciones**: Número flotante fijo, notificación prominente, o animación que capture la atención
+- **Considerar**: Accesibilidad y no obstruir la interacción con los cartones
+
+### 3. Notificación de Cambio de Patrón
+Cuando el host cambia el patrón de juego:
+- Mostrar modal/notificación a todos los jugadores
+- Incluir preview visual del nuevo patrón
+- Asegurar que todos estén al tanto antes de continuar
+- Opcional: Sonido de alerta para el cambio
+
+### 4. Estadísticas de Sesión
+Panel de estadísticas del juego actual:
+- Números llamados vs restantes
+- Tiempo transcurrido de la sesión
+- Historial de ganadores
+- Patrones jugados
+- Estadísticas por jugador (bingos ganados, cartones jugados)
