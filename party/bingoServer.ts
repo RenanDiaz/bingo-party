@@ -31,6 +31,10 @@ import {
   updateSettings,
   updatePattern,
   addChatMessage,
+  updatePlayerStats,
+  updatePlayerStatsConnection,
+  incrementGamesPlayed,
+  incrementPlayerWins,
 } from './gameEngine';
 import type { QuickReaction } from '../shared/types';
 
@@ -159,14 +163,21 @@ export default class BingoServer implements Party.Server {
     this.connections.delete(conn.id);
 
     if (this.state && this.state.players[conn.id]) {
+      const player = this.state.players[conn.id];
+
       // Mark player as disconnected but keep them in state for potential reconnection
       this.state = updatePlayerConnection(this.state, conn.id, false);
 
-      const player = this.state.players[conn.id];
-      if (player) {
+      // Update connection status in player stats
+      if (player.persistentId) {
+        this.state = updatePlayerStatsConnection(this.state, player.persistentId, false);
+      }
+
+      const updatedPlayer = this.state.players[conn.id];
+      if (updatedPlayer) {
         // Broadcast player updated (disconnected) instead of playerLeft
         // This allows them to reconnect without being fully removed
-        this.broadcast({ type: 'playerUpdated', player });
+        this.broadcast({ type: 'playerUpdated', player: updatedPlayer });
       }
     }
   }
@@ -306,6 +317,9 @@ export default class BingoServer implements Party.Server {
         // Reconnect the player with the new connection ID
         this.state = reconnectPlayer(this.state, oldPlayerId, senderId);
 
+        // Update connection status in player stats
+        this.state = updatePlayerStatsConnection(this.state, persistentId, true);
+
         const reconnectedPlayer = this.state.players[senderId];
         if (reconnectedPlayer) {
           // Send card pool to reconnected player
@@ -335,6 +349,11 @@ export default class BingoServer implements Party.Server {
     }
 
     this.state = addPlayer(this.state, player);
+
+    // Update player stats (track by persistentId)
+    if (persistentId) {
+      this.state = updatePlayerStats(this.state, persistentId, playerName, true);
+    }
 
     // Send card pool to the new player
     this.sendTo(senderId, { type: 'cardPool', cards: player.cards });
@@ -414,6 +433,12 @@ export default class BingoServer implements Party.Server {
     }
 
     this.state = addWinner(this.state, senderId, cardId, markedGrid);
+
+    // Increment wins for the player
+    const player = this.state.players[senderId];
+    if (player?.persistentId) {
+      this.state = incrementPlayerWins(this.state, player.persistentId);
+    }
 
     const winner = this.state.winners[this.state.winners.length - 1];
     this.broadcast({ type: 'bingoValidated', winner });
@@ -536,6 +561,9 @@ export default class BingoServer implements Party.Server {
       this.sendTo(senderId, { type: 'error', message: 'No players ready' });
       return;
     }
+
+    // Increment games played for all participating players
+    this.state = incrementGamesPlayed(this.state);
 
     this.state = startGame(this.state);
     this.broadcast({ type: 'gameStarted', state: this.state });

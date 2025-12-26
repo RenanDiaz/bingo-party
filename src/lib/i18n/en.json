@@ -166,5 +166,16 @@
     "leaveHostMessage": "You are the host. If you leave, there's no way to recover the host session and the game will be unplayable.",
     "stay": "Stay",
     "leave": "Leave"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "player": "Player",
+    "wins": "Wins",
+    "games": "Games",
+    "share": "Share",
+    "shareTitle": "BingoParty Leaderboard",
+    "shareText": "Check out the leaderboard for room {roomId}!",
+    "showOnlyConnected": "Show only connected players",
+    "noGamesYet": "No games played yet"
   }
 }

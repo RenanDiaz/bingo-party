@@ -372,19 +372,22 @@ Cuando el host cambia el patrón de juego:
 - Muestra quién cambió el patrón
 - **Componente**: `src/lib/components/PatternChangeNotification.svelte`
 
+### ✅ Chat y Reacciones
+Sistema de comunicación entre jugadores:
+- **En lobby**: Chat completo con mensajes de texto
+- **Durante el juego**: Mensajes preestablecidos y reacciones rápidas
+- **UX**: Mensajes visibles sin abrir el chat (notificaciones flotantes)
+- **Componentes**: `src/lib/components/Chat.svelte`, `src/lib/components/ChatBubble.svelte`, `src/lib/components/ReactionPicker.svelte`
+
+### ✅ Leaderboard de Sala
+Ranking de jugadores visible en el lobby:
+- **Datos**: Posición, nombre, victorias, partidas jugadas
+- **Ubicación**: Visible solo en el lobby (no durante partida)
+- **Filtro**: Toggle para mostrar todos los jugadores o solo conectados
+- **Compartir**: Botón para generar imagen y compartir via Web Share API (usa html2canvas)
+- **Persistencia**: Solo sesión activa (se pierde al reiniciar servidor)
+- **Componente**: `src/lib/components/Leaderboard.svelte`
+
 ## Planned Features
 
-### 1. Chat y Reacciones
-Sistema de comunicación entre jugadores:
-- **En espera (lobby)**: Chat completo con mensajes de texto
-- **Durante el juego**: Solo mensajes preestablecidos y reacciones rápidas
-- **UX**: Los mensajes recibidos deben mostrarse de manera visible sin necesidad de abrir el chat (badges, notificaciones flotantes, o indicadores)
-- **Ubicación**: Acceso fácil desde cualquier parte de la interfaz
-
-### 2. Estadísticas de Sesión
-Panel de estadísticas del juego actual:
-- Números llamados vs restantes
-- Tiempo transcurrido de la sesión
-- Historial de ganadores
-- Patrones jugados
-- Estadísticas por jugador (bingos ganados, cartones jugados)
+(No pending features)

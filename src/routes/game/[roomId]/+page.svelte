@@ -24,6 +24,7 @@
   import Chat from '$lib/components/Chat.svelte';
   import ChatButton from '$lib/components/ChatButton.svelte';
   import FloatingReactions from '$lib/components/FloatingReactions.svelte';
+  import Leaderboard from '$lib/components/Leaderboard.svelte';
 
   const store = getGameStore();
 
@@ -448,6 +449,12 @@
               isHost={store.isHost}
               onKick={(id) => store.kickPlayer(id)}
             />
+            {#if phase === 'lobby' && store.gameState?.playerStats}
+              <Leaderboard
+                playerStats={store.gameState.playerStats}
+                roomId={roomId}
+              />
+            {/if}
           </div>
         </div>
       {/if}
@@ -549,12 +556,18 @@
 
       <!-- Right column: Number board (desktop) -->
       {#if !store.isHost}
-        <div class="hidden lg:block">
+        <div class="hidden lg:block space-y-4">
           <PlayerList
             players={store.allPlayers}
             currentPlayerId={store.myPlayerId}
             isHost={store.isHost}
           />
+          {#if phase === 'lobby' && store.gameState?.playerStats}
+            <Leaderboard
+              playerStats={store.gameState.playerStats}
+              roomId={roomId}
+            />
+          {/if}
         </div>
       {/if}
 
@@ -586,6 +599,12 @@
             isHost={store.isHost}
             onKick={(id) => store.kickPlayer(id)}
           />
+          {#if phase === 'lobby' && store.gameState?.playerStats}
+            <Leaderboard
+              playerStats={store.gameState.playerStats}
+              roomId={roomId}
+            />
+          {/if}
         </div>
       {/if}
     </div>

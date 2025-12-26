@@ -166,5 +166,16 @@
     "leaveHostMessage": "Eres el anfitrión. Si sales, no hay forma de recuperar la sesión de anfitrión y el juego quedará inactivo.",
     "stay": "Quedarse",
     "leave": "Salir"
+  },
+  "leaderboard": {
+    "title": "Clasificación",
+    "player": "Jugador",
+    "wins": "Victorias",
+    "games": "Partidas",
+    "share": "Compartir",
+    "shareTitle": "Clasificación de BingoParty",
+    "shareText": "¡Mira la clasificación de la sala {roomId}!",
+    "showOnlyConnected": "Mostrar solo jugadores conectados",
+    "noGamesYet": "Aún no se han jugado partidas"
   }
 }
