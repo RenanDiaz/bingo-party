@@ -81,7 +81,27 @@
     "allowHighlight": "Allow Highlight Called Numbers"
   },
   "common": {
-    "understood": "Got it"
+    "understood": "Got it",
+    "close": "Close"
+  },
+  "chat": {
+    "title": "Chat",
+    "openChat": "Open chat",
+    "noMessages": "No messages yet. Start the conversation!",
+    "placeholder": "Type a message...",
+    "you": "You",
+    "quickReactions": "Quick reactions",
+    "reactionsOnly": "Only reactions available during game",
+    "reactions": {
+      "good_luck": "Good luck!",
+      "so_close": "So close!",
+      "one_more": "One more!",
+      "nice": "Nice!",
+      "wow": "Wow!",
+      "haha": "Haha!",
+      "nervous": "Nervous!",
+      "lets_go": "Let's go!"
+    }
   },
   "pattern": {
     "selectPattern": "Select Pattern",

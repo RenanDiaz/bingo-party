@@ -8,6 +8,8 @@ import type {
   ClientMessage,
   NumberCall,
   Winner,
+  ChatMessage,
+  QuickReaction,
 } from '../../../shared/types';
 import { checkPatternMatch, getWinningCells } from '../utils/patternDetector';
 import { createEmptyMarkedGrid } from '../utils/cardGenerator';
@@ -60,6 +62,14 @@ export interface PatternChangeNotification {
   changedBy: string;
 }
 
+// Floating reaction notification (shown temporarily)
+export interface FloatingReaction {
+  id: string;
+  playerName: string;
+  reaction: QuickReaction;
+  timestamp: number;
+}
+
 // Create a reactive game store
 export function createGameStore() {
   // Core state
@@ -72,6 +82,12 @@ export function createGameStore() {
   let toasts = $state<Toast[]>([]);
   let lastJoinedPlayerName = $state<string | null>(null);
   let patternChangeNotification = $state<PatternChangeNotification | null>(null);
+
+  // Chat state
+  let chatMessages = $state<ChatMessage[]>([]);
+  let unreadChatCount = $state<number>(0);
+  let isChatOpen = $state<boolean>(false);
+  let floatingReactions = $state<FloatingReaction[]>([]);
 
   // Card state
   let cardPool = $state<BingoCard[]>([]);
@@ -342,6 +358,10 @@ export function createGameStore() {
         if (gameState.players[myPlayerId]) {
           markedCells = { ...gameState.players[myPlayerId].markedCells };
         }
+        // Sync chat messages from server state
+        if (gameState.chatMessages) {
+          chatMessages = gameState.chatMessages;
+        }
         break;
 
       case 'numberCalled':
@@ -474,6 +494,36 @@ export function createGameStore() {
           clearPersistentPlayerId(currentRoomId);
         }
         disconnect();
+        break;
+
+      case 'chatMessage':
+        // Add the new message to local state
+        chatMessages = [...chatMessages, message.message];
+
+        // If it's a reaction from someone else, show floating notification
+        if (message.message.type === 'reaction' && message.message.playerId !== myPlayerId) {
+          const floatingId = `floating_${message.message.id}`;
+          floatingReactions = [...floatingReactions, {
+            id: floatingId,
+            playerName: message.message.playerName,
+            reaction: message.message.content as QuickReaction,
+            timestamp: Date.now(),
+          }];
+          // Auto-remove after 3 seconds
+          setTimeout(() => {
+            floatingReactions = floatingReactions.filter(r => r.id !== floatingId);
+          }, 3000);
+        }
+
+        // Increment unread count if chat is closed and message is from someone else
+        if (!isChatOpen && message.message.playerId !== myPlayerId) {
+          unreadChatCount++;
+        }
+        break;
+
+      case 'chatHistory':
+        // Set initial chat history (when joining a room)
+        chatMessages = message.messages;
         break;
 
       case 'error':
@@ -624,6 +674,32 @@ export function createGameStore() {
     send({ type: 'hostKickPlayer', playerId });
   }
 
+  // Chat actions
+  function sendChatMessage(content: string) {
+    send({ type: 'sendChatMessage', content });
+  }
+
+  function sendReaction(reaction: QuickReaction) {
+    send({ type: 'sendReaction', reaction });
+  }
+
+  function openChat() {
+    isChatOpen = true;
+    unreadChatCount = 0;
+  }
+
+  function closeChat() {
+    isChatOpen = false;
+  }
+
+  function toggleChat() {
+    if (isChatOpen) {
+      closeChat();
+    } else {
+      openChat();
+    }
+  }
+
   return {
     // State (getters)
     get gameState() { return gameState; },
@@ -647,6 +723,12 @@ export function createGameStore() {
     get toasts() { return toasts; },
     get lastJoinedPlayerName() { return lastJoinedPlayerName; },
     get patternChangeNotification() { return patternChangeNotification; },
+
+    // Chat state
+    get chatMessages() { return chatMessages; },
+    get unreadChatCount() { return unreadChatCount; },
+    get isChatOpen() { return isChatOpen; },
+    get floatingReactions() { return floatingReactions; },
 
     // Toast management
     addToast,
@@ -682,6 +764,13 @@ export function createGameStore() {
     createTimeout,
     endTimeout,
     kickPlayer,
+
+    // Chat actions
+    sendChatMessage,
+    sendReaction,
+    openChat,
+    closeChat,
+    toggleChat,
   };
 }
 

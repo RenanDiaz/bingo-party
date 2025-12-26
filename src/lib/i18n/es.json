@@ -81,7 +81,27 @@
     "allowHighlight": "Permitir Resaltar Números Cantados"
   },
   "common": {
-    "understood": "Entendido"
+    "understood": "Entendido",
+    "close": "Cerrar"
+  },
+  "chat": {
+    "title": "Chat",
+    "openChat": "Abrir chat",
+    "noMessages": "No hay mensajes aún. ¡Inicia la conversación!",
+    "placeholder": "Escribe un mensaje...",
+    "you": "Tú",
+    "quickReactions": "Reacciones rápidas",
+    "reactionsOnly": "Solo reacciones disponibles durante el juego",
+    "reactions": {
+      "good_luck": "¡Buena suerte!",
+      "so_close": "¡Casi!",
+      "one_more": "¡Uno más!",
+      "nice": "¡Bien!",
+      "wow": "¡Wow!",
+      "haha": "¡Jaja!",
+      "nervous": "¡Nervioso!",
+      "lets_go": "¡Vamos!"
+    }
   },
   "pattern": {
     "selectPattern": "Seleccionar Patrón",

@@ -30,6 +30,30 @@ export interface Winner {
   winningPattern: boolean[][];
 }
 
+// Chat message types
+export type ChatMessageType = 'text' | 'reaction';
+
+// Quick reaction options (available during gameplay)
+export type QuickReaction =
+  | 'good_luck'    // 🍀 Good luck!
+  | 'so_close'     // 😅 So close!
+  | 'one_more'     // ☝️ One more!
+  | 'nice'         // 👍 Nice!
+  | 'wow'          // 😮 Wow!
+  | 'haha'         // 😂 Haha!
+  | 'nervous'      // 😰 Nervous!
+  | 'lets_go';     // 🔥 Let's go!
+
+// Chat message interface
+export interface ChatMessage {
+  id: string;
+  playerId: string;
+  playerName: string;
+  type: ChatMessageType;
+  content: string;           // Text message or reaction key
+  timestamp: number;
+}
+
 // Pattern types
 export type PatternType = 'preset' | 'custom';
 
@@ -92,6 +116,9 @@ export interface BingoGameState {
   // Timer state
   lastCallTime: number;
   timeoutEndTime: number | null;
+
+  // Chat
+  chatMessages: ChatMessage[];
 }
 
 // Client-side messages
@@ -116,7 +143,9 @@ export type ClientMessage =
   | { type: 'hostToggleAllowHighlight'; enabled: boolean }
   | { type: 'hostCreateTimeout'; durationSeconds: number }
   | { type: 'hostEndTimeout' }
-  | { type: 'hostKickPlayer'; playerId: string };
+  | { type: 'hostKickPlayer'; playerId: string }
+  | { type: 'sendChatMessage'; content: string }
+  | { type: 'sendReaction'; reaction: QuickReaction };
 
 // Server-side messages
 export type ServerMessage =
@@ -137,7 +166,9 @@ export type ServerMessage =
   | { type: 'timeoutEnded' }
   | { type: 'patternChanged'; pattern: Pattern; changedBy: string }
   | { type: 'kicked' }
-  | { type: 'error'; message: string };
+  | { type: 'error'; message: string }
+  | { type: 'chatMessage'; message: ChatMessage }
+  | { type: 'chatHistory'; messages: ChatMessage[] };
 
 // Column ranges
 export const COLUMN_RANGES: Record<BingoColumn, { min: number; max: number }> = {

@@ -21,6 +21,9 @@
   import Toast from '$lib/components/Toast.svelte';
   import FloatingNumber from '$lib/components/FloatingNumber.svelte';
   import PatternChangeNotification from '$lib/components/PatternChangeNotification.svelte';
+  import Chat from '$lib/components/Chat.svelte';
+  import ChatButton from '$lib/components/ChatButton.svelte';
+  import FloatingReactions from '$lib/components/FloatingReactions.svelte';
 
   const store = getGameStore();
 
@@ -630,3 +633,13 @@
   onConfirm={handleLeaveConfirm}
   onCancel={handleLeaveCancel}
 />
+
+<!-- Chat components (only when connected and have player) -->
+{#if store.connected && store.myPlayer}
+  <ChatButton />
+  <Chat
+    isOpen={store.isChatOpen}
+    onClose={() => store.closeChat()}
+  />
+  <FloatingReactions />
+{/if}
