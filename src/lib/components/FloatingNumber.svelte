@@ -16,9 +16,9 @@
 {#if currentNumber}
   <div class="fixed top-16 left-1/2 -translate-x-1/2 z-40 md:hidden pointer-events-none">
     <div
-      class="flex items-center justify-center w-14 h-14 rounded-xl {colorClass} shadow-lg animate-pop"
+      class="flex items-center justify-center px-3 h-14 min-w-14 rounded-xl {colorClass} shadow-lg animate-pop"
     >
-      <span class="text-2xl font-bold text-white drop-shadow-md">
+      <span class="text-2xl font-bold text-white drop-shadow-md whitespace-nowrap">
         {formatted}
       </span>
     </div>
