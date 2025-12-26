@@ -280,6 +280,21 @@
       }
     }, 100);
   }
+
+  function handleExitRoom() {
+    if (shouldPreventNavigation) {
+      // Show confirmation modal
+      pendingNavigation = () => {
+        store.disconnect();
+        goto('/');
+      };
+      showLeaveConfirm = true;
+    } else {
+      // No need for confirmation, just leave
+      store.disconnect();
+      goto('/');
+    }
+  }
 </script>
 
 <svelte:head>
@@ -381,6 +396,13 @@
             {$_('host.share')}
           </button>
         {/if}
+        <button
+          type="button"
+          class="btn btn-secondary text-sm text-red-400 hover:text-red-300"
+          onclick={handleExitRoom}
+        >
+          {$_('game.exitRoom')}
+        </button>
       </div>
     </div>
 
