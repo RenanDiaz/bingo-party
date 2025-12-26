@@ -105,7 +105,8 @@
     "you": "You",
     "ready": "Ready",
     "notReady": "Not Ready",
-    "disconnected": "Disconnected"
+    "disconnected": "Disconnected",
+    "joined": "{name} joined the game"
   },
   "settings": {
     "settings": "Settings",

@@ -47,6 +47,13 @@ function clearPersistentPlayerId(roomId: string): void {
   localStorage.removeItem(`bingo-player-id-${roomId}`);
 }
 
+// Toast notification type
+export interface Toast {
+  id: string;
+  message: string;
+  type?: 'info' | 'success' | 'warning' | 'error';
+}
+
 // Create a reactive game store
 export function createGameStore() {
   // Core state
@@ -56,6 +63,8 @@ export function createGameStore() {
   let connected = $state<boolean>(false);
   let error = $state<string | null>(null);
   let kicked = $state<boolean>(false);
+  let toasts = $state<Toast[]>([]);
+  let lastJoinedPlayerName = $state<string | null>(null);
 
   // Card state
   let cardPool = $state<BingoCard[]>([]);
@@ -347,6 +356,10 @@ export function createGameStore() {
               [message.player.id]: message.player,
             },
           };
+          // Notify about new player (don't notify for self)
+          if (message.player.id !== myPlayerId) {
+            lastJoinedPlayerName = message.player.name;
+          }
         }
         break;
 
@@ -453,6 +466,22 @@ export function createGameStore() {
         }, 3000);
         break;
     }
+  }
+
+  // Toast management
+  function addToast(message: string, type: Toast['type'] = 'info', duration: number = 3000) {
+    const id = crypto.randomUUID();
+    toasts = [...toasts, { id, message, type }];
+
+    if (duration > 0) {
+      setTimeout(() => {
+        removeToast(id);
+      }, duration);
+    }
+  }
+
+  function removeToast(id: string) {
+    toasts = toasts.filter(t => t.id !== id);
   }
 
   // Auto-mark a number locally
@@ -598,6 +627,13 @@ export function createGameStore() {
     get allPlayers() { return allPlayers; },
     get onlinePlayers() { return onlinePlayers; },
     get readyPlayers() { return readyPlayers; },
+    get toasts() { return toasts; },
+    get lastJoinedPlayerName() { return lastJoinedPlayerName; },
+
+    // Toast management
+    addToast,
+    removeToast,
+    clearLastJoinedPlayer: () => { lastJoinedPlayerName = null; },
 
     // Connection
     connect,

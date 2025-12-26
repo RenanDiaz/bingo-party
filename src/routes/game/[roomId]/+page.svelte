@@ -17,6 +17,7 @@
   import WinnerAnnouncement from '$lib/components/WinnerAnnouncement.svelte';
   import PatternPreview from '$lib/components/PatternPreview.svelte';
   import ConfirmModal from '$lib/components/ConfirmModal.svelte';
+  import Toast from '$lib/components/Toast.svelte';
 
   const store = getGameStore();
 
@@ -107,6 +108,16 @@
   $effect(() => {
     if (store.kicked) {
       goto('/?error=kicked');
+    }
+  });
+
+  // Show toast when a new player joins
+  $effect(() => {
+    const playerName = store.lastJoinedPlayerName;
+    if (playerName) {
+      const message = $_('players.joined', { values: { name: playerName } });
+      store.addToast(message, 'info');
+      store.clearLastJoinedPlayer();
     }
   });
 
@@ -589,6 +600,9 @@
     onClose={() => showWinners = false}
   />
 {/if}
+
+<!-- Toast notifications -->
+<Toast toasts={store.toasts} onDismiss={(id) => store.removeToast(id)} />
 
 <!-- Leave confirmation modal (always rendered outside the main conditional) -->
 <ConfirmModal
