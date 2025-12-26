@@ -372,16 +372,16 @@ Cuando el host cambia el patrón de juego:
 - Muestra quién cambió el patrón
 - **Componente**: `src/lib/components/PatternChangeNotification.svelte`
 
+### ✅ Chat y Reacciones
+Sistema de comunicación entre jugadores:
+- **En lobby**: Chat completo con mensajes de texto
+- **Durante el juego**: Mensajes preestablecidos y reacciones rápidas
+- **UX**: Mensajes visibles sin abrir el chat (notificaciones flotantes)
+- **Componentes**: `src/lib/components/Chat.svelte`, `src/lib/components/ChatBubble.svelte`, `src/lib/components/ReactionPicker.svelte`
+
 ## Planned Features
 
-### 1. Chat y Reacciones
-Sistema de comunicación entre jugadores:
-- **En espera (lobby)**: Chat completo con mensajes de texto
-- **Durante el juego**: Solo mensajes preestablecidos y reacciones rápidas
-- **UX**: Los mensajes recibidos deben mostrarse de manera visible sin necesidad de abrir el chat (badges, notificaciones flotantes, o indicadores)
-- **Ubicación**: Acceso fácil desde cualquier parte de la interfaz
-
-### 2. Estadísticas de Sesión
+### 1. Estadísticas de Sesión
 Panel de estadísticas del juego actual:
 - Números llamados vs restantes
 - Tiempo transcurrido de la sesión
