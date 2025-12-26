@@ -4,6 +4,7 @@
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import { _ } from 'svelte-i18n';
+  import { locale } from '$lib/i18n';
   import { getGameStore } from '$lib/stores/gameState.svelte';
 
   import BingoCard from '$lib/components/BingoCard.svelte';
@@ -353,7 +354,7 @@
         {#if store.currentPattern}
           <div class="flex items-center gap-2">
             <PatternPreview pattern={store.currentPattern} size="small" />
-            <span class="text-white/70 text-sm">{store.currentPattern.name}</span>
+            <span class="text-white/70 text-sm">{$locale?.startsWith('es') && store.currentPattern.nameEs ? store.currentPattern.nameEs : store.currentPattern.name}</span>
           </div>
         {/if}
       </div>

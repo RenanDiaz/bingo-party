@@ -162,7 +162,7 @@ export const PRESET_PATTERNS: Pattern[] = [
   {
     id: 'postage-stamp',
     name: 'Postage Stamp',
-    nameEs: 'Sello de Correo',
+    nameEs: 'Estampilla',
     type: 'preset',
     grid: setPattern([[0, 0], [0, 1], [1, 0], [1, 1]]),
     description: 'Complete a 2x2 square in any corner',
@@ -171,7 +171,7 @@ export const PRESET_PATTERNS: Pattern[] = [
   {
     id: 'chevron-up',
     name: 'Chevron',
-    nameEs: 'Galón',
+    nameEs: 'Flecha',
     type: 'preset',
     grid: setPattern([
       [2, 2],
