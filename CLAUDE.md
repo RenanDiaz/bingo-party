@@ -381,10 +381,10 @@ Sistema de comunicación entre jugadores:
 
 ## Planned Features
 
-### 1. Estadísticas de Sesión
-Panel de estadísticas del juego actual:
-- Números llamados vs restantes
-- Tiempo transcurrido de la sesión
-- Historial de ganadores
-- Patrones jugados
-- Estadísticas por jugador (bingos ganados, cartones jugados)
+### 1. Leaderboard de Sala
+Ranking de jugadores visible en el lobby:
+- **Datos**: Posición, nombre, victorias, partidas jugadas
+- **Ubicación**: Visible solo en el lobby (no durante partida)
+- **Filtro**: Toggle para mostrar todos los jugadores o solo conectados
+- **Compartir**: Botón para generar imagen y compartir via Web Share API
+- **Persistencia**: Solo sesión activa (se pierde al reiniciar servidor)
