@@ -78,6 +78,25 @@ export interface GameSettings {
   allowHighlightCalledNumbers: boolean; // Host-controlled: allow players to see called numbers highlighted on their cards
 }
 
+// Player statistics (session-only, tracked by persistentId)
+export interface PlayerStats {
+  persistentId: string;
+  playerName: string; // Last known name
+  wins: number;
+  gamesPlayed: number;
+  connected: boolean; // Current connection status
+}
+
+// Leaderboard entry for display
+export interface LeaderboardEntry {
+  position: number;
+  persistentId: string;
+  playerName: string;
+  wins: number;
+  gamesPlayed: number;
+  connected: boolean;
+}
+
 // Player state
 export interface BingoPlayer {
   id: string;
@@ -119,6 +138,9 @@ export interface BingoGameState {
 
   // Chat
   chatMessages: ChatMessage[];
+
+  // Session statistics (tracked by persistentId)
+  playerStats: Record<string, PlayerStats>;
 }
 
 // Client-side messages

@@ -8,6 +8,7 @@ import type {
   Winner,
   ChatMessage,
   QuickReaction,
+  PlayerStats,
 } from '../shared/types';
 import { getColumnForNumber } from '../shared/types';
 import { DEFAULT_SETTINGS, CARD_POOL_SIZE, MAX_CARDS } from '../shared/constants';
@@ -35,6 +36,7 @@ export function createInitialState(roomId: string, hostId: string): BingoGameSta
     lastCallTime: 0,
     timeoutEndTime: null,
     chatMessages: [],
+    playerStats: {},
   };
 }
 
@@ -643,5 +645,100 @@ export function addChatMessage(
       chatMessages: newMessages,
     },
     message,
+  };
+}
+
+// Initialize or update player stats when a player joins
+export function updatePlayerStats(
+  state: BingoGameState,
+  persistentId: string,
+  playerName: string,
+  connected: boolean
+): BingoGameState {
+  const existingStats = state.playerStats[persistentId];
+
+  const updatedStats: PlayerStats = existingStats
+    ? {
+        ...existingStats,
+        playerName, // Update to latest name
+        connected,
+      }
+    : {
+        persistentId,
+        playerName,
+        wins: 0,
+        gamesPlayed: 0,
+        connected,
+      };
+
+  return {
+    ...state,
+    playerStats: {
+      ...state.playerStats,
+      [persistentId]: updatedStats,
+    },
+  };
+}
+
+// Update connection status for a player in stats
+export function updatePlayerStatsConnection(
+  state: BingoGameState,
+  persistentId: string,
+  connected: boolean
+): BingoGameState {
+  const existingStats = state.playerStats[persistentId];
+  if (!existingStats) return state;
+
+  return {
+    ...state,
+    playerStats: {
+      ...state.playerStats,
+      [persistentId]: {
+        ...existingStats,
+        connected,
+      },
+    },
+  };
+}
+
+// Increment games played for all players with selected cards when game starts
+export function incrementGamesPlayed(state: BingoGameState): BingoGameState {
+  const updatedStats = { ...state.playerStats };
+
+  for (const player of Object.values(state.players)) {
+    if (player.persistentId && player.selectedCardIds.length > 0) {
+      const stats = updatedStats[player.persistentId];
+      if (stats) {
+        updatedStats[player.persistentId] = {
+          ...stats,
+          gamesPlayed: stats.gamesPlayed + 1,
+        };
+      }
+    }
+  }
+
+  return {
+    ...state,
+    playerStats: updatedStats,
+  };
+}
+
+// Increment wins for a player
+export function incrementPlayerWins(
+  state: BingoGameState,
+  persistentId: string
+): BingoGameState {
+  const existingStats = state.playerStats[persistentId];
+  if (!existingStats) return state;
+
+  return {
+    ...state,
+    playerStats: {
+      ...state.playerStats,
+      [persistentId]: {
+        ...existingStats,
+        wins: existingStats.wins + 1,
+      },
+    },
   };
 }

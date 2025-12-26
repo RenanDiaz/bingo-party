@@ -379,12 +379,15 @@ Sistema de comunicación entre jugadores:
 - **UX**: Mensajes visibles sin abrir el chat (notificaciones flotantes)
 - **Componentes**: `src/lib/components/Chat.svelte`, `src/lib/components/ChatBubble.svelte`, `src/lib/components/ReactionPicker.svelte`
 
-## Planned Features
-
-### 1. Leaderboard de Sala
+### ✅ Leaderboard de Sala
 Ranking de jugadores visible en el lobby:
 - **Datos**: Posición, nombre, victorias, partidas jugadas
 - **Ubicación**: Visible solo en el lobby (no durante partida)
 - **Filtro**: Toggle para mostrar todos los jugadores o solo conectados
-- **Compartir**: Botón para generar imagen y compartir via Web Share API
+- **Compartir**: Botón para generar imagen y compartir via Web Share API (usa html2canvas)
 - **Persistencia**: Solo sesión activa (se pierde al reiniciar servidor)
+- **Componente**: `src/lib/components/Leaderboard.svelte`
+
+## Planned Features
+
+(No pending features)
