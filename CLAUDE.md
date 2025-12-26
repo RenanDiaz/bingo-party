@@ -357,6 +357,21 @@ npm run deploy:party
 - `partykit`: Real-time backend framework
 - Node.js 20+ required (see `.nvmrc`)
 
+## Completed Features
+
+### ✅ Mejora de Visibilidad del Número Actual
+El número llamado es visible desde cualquier parte de la pantalla:
+- **Implementación**: Componente `FloatingNumber.svelte` muestra el número actual flotante en móvil
+- **Ubicación**: Fijo en la parte superior central de la pantalla (solo móvil)
+- **Componente**: `src/lib/components/FloatingNumber.svelte`
+
+### ✅ Notificación de Cambio de Patrón
+Cuando el host cambia el patrón de juego:
+- Modal de notificación mostrado a todos los jugadores
+- Incluye preview visual del nuevo patrón
+- Muestra quién cambió el patrón
+- **Componente**: `src/lib/components/PatternChangeNotification.svelte`
+
 ## Planned Features
 
 ### 1. Chat y Reacciones
@@ -366,20 +381,7 @@ Sistema de comunicación entre jugadores:
 - **UX**: Los mensajes recibidos deben mostrarse de manera visible sin necesidad de abrir el chat (badges, notificaciones flotantes, o indicadores)
 - **Ubicación**: Acceso fácil desde cualquier parte de la interfaz
 
-### 2. Mejora de Visibilidad del Número Actual
-El número llamado debe ser visible desde cualquier parte de la pantalla:
-- **Móvil**: Prioridad alta - el número debe verse sin importar el scroll
-- **Opciones**: Número flotante fijo, notificación prominente, o animación que capture la atención
-- **Considerar**: Accesibilidad y no obstruir la interacción con los cartones
-
-### 3. Notificación de Cambio de Patrón
-Cuando el host cambia el patrón de juego:
-- Mostrar modal/notificación a todos los jugadores
-- Incluir preview visual del nuevo patrón
-- Asegurar que todos estén al tanto antes de continuar
-- Opcional: Sonido de alerta para el cambio
-
-### 4. Estadísticas de Sesión
+### 2. Estadísticas de Sesión
 Panel de estadísticas del juego actual:
 - Números llamados vs restantes
 - Tiempo transcurrido de la sesión

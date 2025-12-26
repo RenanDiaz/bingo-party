@@ -30,7 +30,9 @@ import {
   endTimeout,
   updateSettings,
   updatePattern,
+  addChatMessage,
 } from './gameEngine';
+import type { QuickReaction } from '../shared/types';
 
 export default class BingoServer implements Party.Server {
   state: BingoGameState | null = null;
@@ -264,6 +266,14 @@ export default class BingoServer implements Party.Server {
 
       case 'hostKickPlayer':
         this.handleHostKickPlayer(sender.id, data.playerId);
+        break;
+
+      case 'sendChatMessage':
+        this.handleSendChatMessage(sender.id, data.content);
+        break;
+
+      case 'sendReaction':
+        this.handleSendReaction(sender.id, data.reaction);
         break;
 
       default:
@@ -789,5 +799,60 @@ export default class BingoServer implements Party.Server {
 
     this.broadcast({ type: 'playerLeft', playerId });
     this.broadcast({ type: 'gameState', state: this.state });
+  }
+
+  // Chat: Send text message (only in lobby phase)
+  private handleSendChatMessage(senderId: string, content: string) {
+    if (!this.state) return;
+
+    const player = this.state.players[senderId];
+    if (!player) {
+      this.sendTo(senderId, { type: 'error', message: 'Player not found' });
+      return;
+    }
+
+    // Only allow full text chat in lobby
+    if (this.state.phase !== 'lobby') {
+      this.sendTo(senderId, { type: 'error', message: 'Text chat only available in lobby' });
+      return;
+    }
+
+    // Validate message content
+    const trimmedContent = content.trim();
+    if (!trimmedContent || trimmedContent.length > 200) {
+      return; // Silently ignore empty or too long messages
+    }
+
+    const result = addChatMessage(this.state, senderId, player.name, trimmedContent, 'text');
+    this.state = result.state;
+
+    // Broadcast the new message to all players
+    this.broadcast({ type: 'chatMessage', message: result.message });
+  }
+
+  // Chat: Send quick reaction (allowed anytime)
+  private handleSendReaction(senderId: string, reaction: QuickReaction) {
+    if (!this.state) return;
+
+    const player = this.state.players[senderId];
+    if (!player) {
+      this.sendTo(senderId, { type: 'error', message: 'Player not found' });
+      return;
+    }
+
+    // Validate reaction is one of the allowed types
+    const validReactions: QuickReaction[] = [
+      'good_luck', 'so_close', 'one_more', 'nice',
+      'wow', 'haha', 'nervous', 'lets_go'
+    ];
+    if (!validReactions.includes(reaction)) {
+      return; // Silently ignore invalid reactions
+    }
+
+    const result = addChatMessage(this.state, senderId, player.name, reaction, 'reaction');
+    this.state = result.state;
+
+    // Broadcast the reaction to all players
+    this.broadcast({ type: 'chatMessage', message: result.message });
   }
 }

@@ -6,12 +6,17 @@ import type {
   GameSettings,
   NumberCall,
   Winner,
+  ChatMessage,
+  QuickReaction,
 } from '../shared/types';
 import { getColumnForNumber } from '../shared/types';
 import { DEFAULT_SETTINGS, CARD_POOL_SIZE, MAX_CARDS } from '../shared/constants';
 import { DEFAULT_PATTERN } from '../shared/patterns';
 import { generateCardPool, generateShuffledNumbers, createEmptyMarkedGrid } from './cardGenerator';
 import { checkPatternMatch, validateMarkedCells, getWinningCells } from './patternValidator';
+
+// Maximum chat messages to keep in history
+const MAX_CHAT_MESSAGES = 100;
 
 // Create initial game state
 export function createInitialState(roomId: string, hostId: string): BingoGameState {
@@ -29,6 +34,7 @@ export function createInitialState(roomId: string, hostId: string): BingoGameSta
     winners: [],
     lastCallTime: 0,
     timeoutEndTime: null,
+    chatMessages: [],
   };
 }
 
@@ -600,5 +606,42 @@ export function updatePattern(
   return {
     ...state,
     currentPattern: pattern,
+  };
+}
+
+// Generate a unique message ID
+function generateMessageId(): string {
+  return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+// Add a chat message
+export function addChatMessage(
+  state: BingoGameState,
+  playerId: string,
+  playerName: string,
+  content: string,
+  type: 'text' | 'reaction' = 'text'
+): { state: BingoGameState; message: ChatMessage } {
+  const message: ChatMessage = {
+    id: generateMessageId(),
+    playerId,
+    playerName,
+    type,
+    content,
+    timestamp: Date.now(),
+  };
+
+  // Keep only the last MAX_CHAT_MESSAGES messages
+  const newMessages = [...state.chatMessages, message];
+  if (newMessages.length > MAX_CHAT_MESSAGES) {
+    newMessages.shift();
+  }
+
+  return {
+    state: {
+      ...state,
+      chatMessages: newMessages,
+    },
+    message,
   };
 }
