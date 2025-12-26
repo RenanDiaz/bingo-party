@@ -18,13 +18,38 @@ bingo-party/
 ├── src/                           # Frontend (SvelteKit)
 │   ├── lib/
 │   │   ├── components/            # Svelte 5 components
-│   │   ├── stores/                # Reactive stores (Svelte 5 runes)
+│   │   │   ├── BingoCard.svelte         # Card display and cell marking
+│   │   │   ├── BingoButton.svelte       # Floating Bingo claim button
+│   │   │   ├── CalledHistory.svelte     # Recent called numbers display
+│   │   │   ├── CalledNumberDisplay.svelte # Current number display
+│   │   │   ├── CardPreview.svelte       # Miniature card preview
+│   │   │   ├── CardSelector.svelte      # Card selection interface
+│   │   │   ├── ConfirmModal.svelte      # Confirmation dialog component
+│   │   │   ├── HostControls.svelte      # Host control panel
+│   │   │   ├── LanguageSelector.svelte  # EN/ES language toggle
+│   │   │   ├── NumberBoard.svelte       # 1-75 number grid
+│   │   │   ├── NumberBoardModal.svelte  # Modal wrapper for NumberBoard
+│   │   │   ├── PatternPreview.svelte    # Visual pattern display
+│   │   │   ├── PatternSelector.svelte   # Pattern selection UI
+│   │   │   ├── PlayerList.svelte        # Player list with status
+│   │   │   ├── Toast.svelte             # Toast notification component
+│   │   │   └── WinnerAnnouncement.svelte # Winner celebration modal
+│   │   ├── stores/
+│   │   │   └── gameState.svelte.ts      # Central state management
 │   │   ├── utils/                 # Client-side utility functions
-│   │   └── i18n/                  # Translation files (en.json, es.json)
+│   │   │   ├── audio.ts                 # Sound effects (number call, bingo)
+│   │   │   ├── cardGenerator.ts         # Card grid utilities
+│   │   │   ├── numberFormatter.ts       # Number formatting helpers
+│   │   │   └── patternDetector.ts       # Pattern matching logic
+│   │   └── i18n/                  # Translation files
+│   │       ├── index.ts                 # i18n initialization
+│   │       ├── en.json                  # English translations
+│   │       └── es.json                  # Spanish translations
 │   └── routes/                    # SvelteKit routes
-│       ├── +page.svelte           # Landing page
+│       ├── +page.svelte           # Landing page (create/join game)
 │       ├── +layout.svelte         # Root layout with header
-│       └── game/[roomId]/         # Game room route
+│       └── game/[roomId]/
+│           └── +page.svelte       # Main game interface
 ├── party/                         # Backend (PartyKit server)
 │   ├── bingoServer.ts             # Main WebSocket server
 │   ├── gameEngine.ts              # Game state management
@@ -32,9 +57,11 @@ bingo-party/
 │   └── patternValidator.ts        # Win pattern validation
 ├── shared/                        # Shared code between frontend and backend
 │   ├── types.ts                   # TypeScript interfaces and types
-│   ├── patterns.ts                # Winning pattern definitions
+│   ├── patterns.ts                # 13 preset winning patterns
 │   └── constants.ts               # Game constants
 ├── static/                        # Static assets (favicon, logos)
+├── scripts/                       # Build scripts
+│   └── convert-favicon.js         # Favicon generation
 ├── partykit.json                  # PartyKit configuration
 ├── svelte.config.js               # SvelteKit configuration
 ├── tailwind.config.js             # Tailwind CSS configuration
@@ -89,10 +116,23 @@ Copy `.env.example` to `.env`:
 
 ### Game Flow
 
-1. **Lobby Phase**: Players join, select cards (1-4 from pool of 8)
-2. **Playing Phase**: Host calls numbers, players mark cards
-3. **Bingo Claim**: Server validates winning patterns
-4. **Finished Phase**: Winners announced
+1. **Lobby Phase**: Players join room, receive pool of 8 cards to choose from
+2. **Card Selection**: Players select 1-4 cards, confirm when ready
+3. **Playing Phase**: Host calls numbers (manual or auto), players mark cards
+4. **Timeout Phase**: Optional pause allowing players to change cards
+5. **Bingo Claim**: Floating button appears when pattern matched; server validates
+6. **Finished Phase**: Winners announced with celebration modal
+
+### Key Features
+
+- **Persistent Player ID**: Reconnection support using localStorage-based identity
+- **Toast Notifications**: Player join events shown via toast system
+- **Floating Bingo Button**: Appears at bottom of screen when player can claim
+- **Highlight Called Numbers**: Host-controlled option, player-toggleable preference
+- **Navigation Prevention**: Warns before leaving during active game
+- **Sound Effects**: Audio feedback for number calls and Bingo wins
+- **Auto-mark**: Optional automatic cell marking when numbers are called
+- **Host Controls**: Pattern selection, auto/manual call, speed, timeout, kick players
 
 ### Key Type Definitions (shared/types.ts)
 
@@ -102,8 +142,34 @@ type GamePhase = 'lobby' | 'cardSelection' | 'playing' | 'paused' | 'timeout' | 
 
 // Core interfaces
 interface BingoCard { id: string; grid: CellValue[][]; }
-interface BingoPlayer { id, name, isHost, cards, selectedCardIds, markedCells, ... }
-interface BingoGameState { roomId, phase, hostId, players, calledNumbers, ... }
+interface BingoPlayer {
+  id: string;
+  persistentId?: string;         // For reconnection
+  name: string;
+  isHost: boolean;
+  connected: boolean;
+  cards: BingoCard[];
+  selectedCardIds: string[];
+  markedCells: Record<string, boolean[][]>;
+  autoMark: boolean;
+  readyToPlay: boolean;
+  highlightCalledNumbers: boolean;
+}
+interface BingoGameState {
+  roomId: string;
+  phase: GamePhase;
+  hostId: string;
+  players: Record<string, BingoPlayer>;
+  calledNumbers: number[];
+  remainingNumbers: number[];
+  currentNumber: number | null;
+  callHistory: NumberCall[];
+  settings: GameSettings;
+  currentPattern: Pattern;
+  winners: Winner[];
+  lastCallTime: number;
+  timeoutEndTime: number | null;
+}
 ```
 
 ## Code Conventions
@@ -160,18 +226,35 @@ let { propName } = $props();
 - **`party/bingoServer.ts`**: WebSocket message routing, connection handling
 - **`party/gameEngine.ts`**: Pure functions for state transformations
 - **`party/patternValidator.ts`**: Win condition checking logic
+- **`party/cardGenerator.ts`**: Server-side card generation
 
 ### Frontend (SvelteKit)
 
-- **`src/lib/stores/gameState.svelte.ts`**: Central state management, WebSocket client
-- **`src/routes/game/[roomId]/+page.svelte`**: Main game interface
-- **`src/lib/components/BingoCard.svelte`**: Card display and interaction
+- **`src/lib/stores/gameState.svelte.ts`**: Central state management, WebSocket client, toast system, reconnection logic
+- **`src/routes/game/[roomId]/+page.svelte`**: Main game interface, navigation prevention, player join flow
+- **`src/routes/+page.svelte`**: Landing page with create/join game forms
+
+#### Key Components
+
+- **`BingoCard.svelte`**: Card display, cell marking, highlight called numbers
+- **`BingoButton.svelte`**: Floating "Claim BINGO!" button (appears when pattern matched)
+- **`HostControls.svelte`**: Pattern selection, auto-call toggle, speed control, timeout, game lifecycle
+- **`CardSelector.svelte`**: Card selection interface with regenerate options
+- **`Toast.svelte`**: Toast notification display (player joins, etc.)
+- **`PatternSelector.svelte`**: Modal for selecting from 13 preset patterns
+- **`WinnerAnnouncement.svelte`**: Winner celebration modal with placement
+- **`ConfirmModal.svelte`**: Reusable confirmation dialog
+
+#### Utility Files
+
+- **`src/lib/utils/patternDetector.ts`**: Client-side pattern matching and winning cell detection
+- **`src/lib/utils/audio.ts`**: Sound effects for number calls and Bingo wins
 
 ### Shared
 
-- **`shared/types.ts`**: All TypeScript interfaces and message types
-- **`shared/patterns.ts`**: 13 preset winning patterns
-- **`shared/constants.ts`**: Game configuration (grid size, card limits, timing)
+- **`shared/types.ts`**: All TypeScript interfaces, message types, and utility functions
+- **`shared/patterns.ts`**: 13 preset winning patterns with Spanish translations
+- **`shared/constants.ts`**: Game configuration (grid size, card limits, timing, default settings)
 
 ## Testing Changes
 
@@ -185,27 +268,41 @@ let { propName } = $props();
 
 ### Adding a New Winning Pattern
 
-1. Add pattern definition to `shared/patterns.ts`
-2. Add special handling in `party/patternValidator.ts` if needed
-3. Update client-side `src/lib/utils/patternDetector.ts` if pattern requires special logic
+1. Add pattern definition to `shared/patterns.ts` using `setPattern()` helper
+2. Include both `name` and `nameEs` for translations
+3. Add special handling in `party/patternValidator.ts` if pattern has multiple valid positions (like "any line")
+4. Update client-side `src/lib/utils/patternDetector.ts` if pattern requires special matching logic
 
 ### Adding Translation Strings
 
 1. Add key to `src/lib/i18n/en.json`
 2. Add corresponding key to `src/lib/i18n/es.json`
 3. Use in component: `{$_('your.key.path')}`
+4. For interpolation: `{$_('key', { values: { name: value } })}`
 
 ### Adding a New Message Type
 
 1. Add to `ClientMessage` or `ServerMessage` union in `shared/types.ts`
 2. Handle in `party/bingoServer.ts` (server-side)
 3. Handle in `gameState.svelte.ts` `handleServerMessage` (client-side)
+4. Add corresponding action method in `createGameStore()` if needed
 
 ### Modifying Game State
 
 1. Create pure function in `party/gameEngine.ts`
 2. Call from message handler in `party/bingoServer.ts`
-3. Broadcast state update to clients
+3. Broadcast state update to clients via `this.party.broadcast()`
+
+### Adding Toast Notifications
+
+1. Use `store.addToast(message, type, duration)` from game store
+2. Types: `'info'`, `'success'`, `'warning'`, `'error'`
+3. Default duration is 3000ms
+
+### Adding Sound Effects
+
+1. Add audio handling in `src/lib/utils/audio.ts`
+2. Call from appropriate place in `gameState.svelte.ts` message handlers
 
 ## Deployment
 
@@ -222,10 +319,40 @@ npm run deploy:party
 
 ## Notes for AI Assistants
 
+### Code Quality
+
 - Always maintain TypeScript strict mode compliance
 - Prefer immutable state updates (spread operators, map/filter)
 - Keep server-side game logic in pure functions for testability
-- The FREE space (center cell) is automatically marked
+- Use Svelte 5 runes (`$state`, `$derived`, `$effect`) for reactive state
+- Props use callback pattern: `onSelect`, `onConfirm`, `onClose`
+
+### Game Logic
+
+- The FREE space (center cell, position [2][2]) is automatically marked
 - Card selection validates on both client and server
 - Auto-call stops when a winner is detected
-- WebSocket reconnection with exponential backoff is built-in
+- Maximum 3 winners per game (configurable via `maxWinners`)
+- Players can be kicked by host; kicked players have their `persistentId` cleared
+
+### WebSocket & Connection
+
+- WebSocket reconnection uses exponential backoff (1s, 2s, 4s, 8s, 16s)
+- Maximum 5 reconnection attempts before showing error
+- `persistentId` in localStorage enables state restoration on reconnect
+- Use `beforeNavigate` and `beforeunload` for navigation prevention
+
+### Available Patterns (13 presets)
+
+1. Horizontal Line, Vertical Line, Diagonal Line, Any Line
+2. Four Corners, Blackout (full card)
+3. Letter X, Letter T, Letter L
+4. Plus Sign, Picture Frame
+5. Postage Stamp (2x2 corner), Chevron
+
+### Dependencies to Know
+
+- `partysocket`: WebSocket client with reconnection
+- `svelte-i18n`: Internationalization (`$_()` function)
+- `partykit`: Real-time backend framework
+- Node.js 20+ required (see `.nvmrc`)
