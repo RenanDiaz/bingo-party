@@ -5,6 +5,7 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    background-color: #4c1d95;
   }
 
   body {
