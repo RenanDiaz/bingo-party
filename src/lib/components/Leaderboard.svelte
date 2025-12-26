@@ -143,56 +143,62 @@
     </label>
   </div>
 
-  <!-- Leaderboard content (for sharing) -->
-  <div bind:this={leaderboardElement} class="space-y-2 bg-primary-900/50 rounded-lg p-3">
+  <!-- Leaderboard content (for sharing) - Using table with inline styles for html2canvas compatibility -->
+  <div
+    bind:this={leaderboardElement}
+    style="background-color: #2d2540; border-radius: 8px; padding: 16px;"
+  >
     {#if hasAnyGames}
-      <!-- Header -->
-      <div class="grid grid-cols-[2rem_1fr_3rem_3rem] gap-2 text-xs text-white/50 pb-1 border-b border-white/10">
-        <span>#</span>
-        <span>{$_('leaderboard.player')}</span>
-        <span class="text-center">{$_('leaderboard.wins')}</span>
-        <span class="text-center">{$_('leaderboard.games')}</span>
-      </div>
+      <table style="width: 100%; border-collapse: collapse; font-family: system-ui, -apple-system, sans-serif;">
+        <!-- Header -->
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <th style="text-align: left; padding: 8px 4px; color: rgba(255,255,255,0.5); font-size: 12px; font-weight: normal; width: 32px;">#</th>
+            <th style="text-align: left; padding: 8px 4px; color: rgba(255,255,255,0.5); font-size: 12px; font-weight: normal;">{$_('leaderboard.player')}</th>
+            <th style="text-align: center; padding: 8px 4px; color: rgba(255,255,255,0.5); font-size: 12px; font-weight: normal; width: 50px;">{$_('leaderboard.wins')}</th>
+            <th style="text-align: center; padding: 8px 4px; color: rgba(255,255,255,0.5); font-size: 12px; font-weight: normal; width: 50px;">{$_('leaderboard.games')}</th>
+          </tr>
+        </thead>
+        <!-- Entries -->
+        <tbody>
+          {#each leaderboardEntries as entry (entry.persistentId)}
+            <tr style="background-color: rgba(255,255,255,0.05); {entry.connected ? '' : 'opacity: 0.5;'}">
+              <!-- Position -->
+              <td style="padding: 10px 4px; color: white; font-weight: bold; font-size: 14px; vertical-align: middle;">
+                {#if entry.position <= 3 && entry.wins > 0}
+                  {getMedalEmoji(entry.position)}
+                {:else}
+                  {entry.position}
+                {/if}
+              </td>
 
-      <!-- Entries -->
-      <div class="space-y-1 max-h-60 overflow-y-auto scrollbar-thin">
-        {#each leaderboardEntries as entry (entry.persistentId)}
-          <div
-            class="grid grid-cols-[2rem_1fr_3rem_3rem] gap-2 items-center p-2 rounded-lg {entry.connected ? 'bg-white/5' : 'bg-white/5 opacity-50'}"
-          >
-            <!-- Position -->
-            <span class="text-white font-bold text-sm">
-              {#if entry.position <= 3 && entry.wins > 0}
-                {getMedalEmoji(entry.position)}
-              {:else}
-                {entry.position}
-              {/if}
-            </span>
+              <!-- Player name with connection indicator -->
+              <td style="padding: 10px 4px; vertical-align: middle;">
+                <span style="display: inline-flex; align-items: center; gap: 8px;">
+                  <span
+                    style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: {entry.connected ? '#22c55e' : '#6b7280'};"
+                  ></span>
+                  <span style="color: white;">{entry.playerName}</span>
+                </span>
+              </td>
 
-            <!-- Player name with connection indicator -->
-            <div class="flex items-center gap-2 min-w-0">
-              <div
-                class="w-2 h-2 rounded-full flex-shrink-0 {entry.connected ? 'bg-green-500' : 'bg-gray-500'}"
-              ></div>
-              <span class="text-white truncate">{entry.playerName}</span>
-            </div>
+              <!-- Wins -->
+              <td style="text-align: center; padding: 10px 4px; color: #fbbf24; font-weight: bold; vertical-align: middle;">{entry.wins}</td>
 
-            <!-- Wins -->
-            <span class="text-center text-accent-gold font-bold">{entry.wins}</span>
-
-            <!-- Games played -->
-            <span class="text-center text-white/70">{entry.gamesPlayed}</span>
-          </div>
-        {/each}
-      </div>
+              <!-- Games played -->
+              <td style="text-align: center; padding: 10px 4px; color: rgba(255,255,255,0.7); vertical-align: middle;">{entry.gamesPlayed}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
     {:else}
-      <p class="text-white/40 text-sm text-center py-4">
+      <p style="color: rgba(255,255,255,0.4); font-size: 14px; text-align: center; padding: 16px 0;">
         {$_('leaderboard.noGamesYet')}
       </p>
     {/if}
 
     <!-- Room ID footer for shared image -->
-    <div class="text-xs text-white/30 text-center pt-2 border-t border-white/10">
+    <div style="font-size: 12px; color: rgba(255,255,255,0.3); text-align: center; padding-top: 12px; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
       BingoParty - {$_('game.room')}: {roomId}
     </div>
   </div>
