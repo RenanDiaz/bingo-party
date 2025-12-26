@@ -20,6 +20,7 @@
   import ConfirmModal from '$lib/components/ConfirmModal.svelte';
   import Toast from '$lib/components/Toast.svelte';
   import FloatingNumber from '$lib/components/FloatingNumber.svelte';
+  import PatternChangeNotification from '$lib/components/PatternChangeNotification.svelte';
 
   const store = getGameStore();
 
@@ -601,6 +602,16 @@
     isOpen={showWinners}
     onClose={() => showWinners = false}
   />
+
+  <!-- Pattern change notification -->
+  {#if store.patternChangeNotification}
+    <PatternChangeNotification
+      pattern={store.patternChangeNotification.pattern}
+      changedBy={store.patternChangeNotification.changedBy}
+      isOpen={true}
+      onClose={() => store.dismissPatternChangeNotification()}
+    />
+  {/if}
 {/if}
 
 <!-- Floating number indicator for mobile -->

@@ -80,10 +80,15 @@
     "sessionSettings": "Configuración de Sesión",
     "allowHighlight": "Permitir Resaltar Números Cantados"
   },
+  "common": {
+    "understood": "Entendido"
+  },
   "pattern": {
     "selectPattern": "Seleccionar Patrón",
     "createCustom": "Crear Patrón Personalizado",
     "preview": "Vista Previa del Patrón",
+    "changed": "Patrón Cambiado",
+    "changedBy": "{name} cambió el patrón",
     "horizontalLine": "Línea Horizontal",
     "verticalLine": "Línea Vertical",
     "diagonalLine": "Línea Diagonal",

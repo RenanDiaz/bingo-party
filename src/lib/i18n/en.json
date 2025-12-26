@@ -80,10 +80,15 @@
     "sessionSettings": "Session Settings",
     "allowHighlight": "Allow Highlight Called Numbers"
   },
+  "common": {
+    "understood": "Got it"
+  },
   "pattern": {
     "selectPattern": "Select Pattern",
     "createCustom": "Create Custom Pattern",
     "preview": "Pattern Preview",
+    "changed": "Pattern Changed",
+    "changedBy": "{name} changed the pattern",
     "horizontalLine": "Horizontal Line",
     "verticalLine": "Vertical Line",
     "diagonalLine": "Diagonal Line",
