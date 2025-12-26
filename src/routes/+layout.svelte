@@ -21,7 +21,7 @@
 {:else}
   <div class="min-h-screen">
     <!-- Header -->
-    <header class="fixed top-0 left-0 right-0 z-40 bg-primary-900/80 backdrop-blur-sm border-b border-white/10">
+    <header class="fixed top-0 left-0 right-0 z-40 bg-primary-900 backdrop-blur-sm border-b border-white/10" style="padding-top: env(safe-area-inset-top);">
       <div class="container mx-auto px-4 h-14 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2">
           <span class="text-2xl">🎰</span>
@@ -32,7 +32,7 @@
     </header>
 
     <!-- Main content -->
-    <main class="pt-14 min-h-screen">
+    <main class="min-h-screen" style="padding-top: calc(3.5rem + env(safe-area-inset-top))">
       {@render children()}
     </main>
   </div>
