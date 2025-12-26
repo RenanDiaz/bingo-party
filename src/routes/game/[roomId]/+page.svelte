@@ -19,6 +19,7 @@
   import PatternPreview from '$lib/components/PatternPreview.svelte';
   import ConfirmModal from '$lib/components/ConfirmModal.svelte';
   import Toast from '$lib/components/Toast.svelte';
+  import FloatingNumber from '$lib/components/FloatingNumber.svelte';
 
   const store = getGameStore();
 
@@ -601,6 +602,9 @@
     onClose={() => showWinners = false}
   />
 {/if}
+
+<!-- Floating number indicator for mobile -->
+<FloatingNumber currentNumber={store.gameState?.currentNumber ?? null} />
 
 <!-- Toast notifications -->
 <Toast toasts={store.toasts} onDismiss={(id) => store.removeToast(id)} />
