@@ -135,6 +135,7 @@ export type ServerMessage =
   | { type: 'gameReset'; state: BingoGameState }
   | { type: 'timeoutStarted'; endTime: number }
   | { type: 'timeoutEnded' }
+  | { type: 'patternChanged'; pattern: Pattern; changedBy: string }
   | { type: 'kicked' }
   | { type: 'error'; message: string };
 

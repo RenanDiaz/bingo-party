@@ -11,7 +11,7 @@ import type {
 } from '../../../shared/types';
 import { checkPatternMatch, getWinningCells } from '../utils/patternDetector';
 import { createEmptyMarkedGrid } from '../utils/cardGenerator';
-import { playNumberCalledSound, playBingoSound } from '../utils/audio';
+import { playNumberCalledSound, playBingoSound, playPatternChangedSound } from '../utils/audio';
 
 // Generate a persistent player ID for reconnection
 function generatePersistentId(): string {
@@ -54,6 +54,12 @@ export interface Toast {
   type?: 'info' | 'success' | 'warning' | 'error';
 }
 
+// Pattern change notification type
+export interface PatternChangeNotification {
+  pattern: Pattern;
+  changedBy: string;
+}
+
 // Create a reactive game store
 export function createGameStore() {
   // Core state
@@ -65,6 +71,7 @@ export function createGameStore() {
   let kicked = $state<boolean>(false);
   let toasts = $state<Toast[]>([]);
   let lastJoinedPlayerName = $state<string | null>(null);
+  let patternChangeNotification = $state<PatternChangeNotification | null>(null);
 
   // Card state
   let cardPool = $state<BingoCard[]>([]);
@@ -450,6 +457,16 @@ export function createGameStore() {
         }
         break;
 
+      case 'patternChanged':
+        // Show notification to all players (except host who triggered it)
+        patternChangeNotification = {
+          pattern: message.pattern,
+          changedBy: message.changedBy,
+        };
+        // Play alert sound
+        playPatternChangedSound();
+        break;
+
       case 'kicked':
         kicked = true;
         // Clear persistent ID so they can't rejoin with the same identity
@@ -629,11 +646,13 @@ export function createGameStore() {
     get readyPlayers() { return readyPlayers; },
     get toasts() { return toasts; },
     get lastJoinedPlayerName() { return lastJoinedPlayerName; },
+    get patternChangeNotification() { return patternChangeNotification; },
 
     // Toast management
     addToast,
     removeToast,
     clearLastJoinedPlayer: () => { lastJoinedPlayerName = null; },
+    dismissPatternChangeNotification: () => { patternChangeNotification = null; },
 
     // Connection
     connect,

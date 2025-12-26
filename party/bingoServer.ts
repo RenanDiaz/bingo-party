@@ -633,7 +633,18 @@ export default class BingoServer implements Party.Server {
 
     if (!this.state) return;
 
+    // Get host name for notification
+    const hostPlayer = this.state.players[senderId];
+    const hostName = hostPlayer?.name ?? 'Host';
+
     this.state = updatePattern(this.state, pattern);
+
+    // Notify all players (except host) about pattern change
+    this.broadcast(
+      { type: 'patternChanged', pattern, changedBy: hostName },
+      senderId
+    );
+
     this.broadcast({ type: 'gameState', state: this.state });
   }
 

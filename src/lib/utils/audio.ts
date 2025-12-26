@@ -94,3 +94,44 @@ export function playBingoSound(): void {
     console.warn('Audio playback failed:', error);
   }
 }
+
+// Play an alert sound when the pattern changes
+export function playPatternChangedSound(): void {
+  try {
+    const ctx = getAudioContext();
+
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const now = ctx.currentTime;
+
+    // Play two-tone alert sound (attention-grabbing but not alarming)
+    const notes = [587.33, 880]; // D5, A5 - ascending attention sound
+
+    notes.forEach((freq, index) => {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.type = 'triangle'; // Softer than sine, more noticeable
+      oscillator.frequency.setValueAtTime(freq, now + index * 0.12);
+
+      gainNode.gain.setValueAtTime(0, now + index * 0.12);
+      gainNode.gain.linearRampToValueAtTime(0.35, now + index * 0.12 + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + index * 0.12 + 0.25);
+
+      oscillator.start(now + index * 0.12);
+      oscillator.stop(now + index * 0.12 + 0.25);
+
+      oscillator.onended = () => {
+        oscillator.disconnect();
+        gainNode.disconnect();
+      };
+    });
+  } catch (error) {
+    console.warn('Audio playback failed:', error);
+  }
+}
